@@ -10,21 +10,46 @@ ApplicationWindow {
     title: qsTr("Hello World")
 
     Image {
-        width: 720
-        height: 1280
+        id: screenImage
         source: myImage
+        width: sourceSize.width * factor
+        height: sourceSize.height * factor
+        property real factor: 0.5
+        property rect selection
 
         Rectangle {
             id: selectionRect
             color: "transparent"
             border.width: 2
             border.color: "white"
+            width: screenImage.selection.width * screenImage.factor
+            height: screenImage.selection.height * screenImage.factor
+            x: screenImage.selection.x * screenImage.factor
+            y: screenImage.selection.y * screenImage.factor
+
+            Rectangle {
+                anchors.fill: sizeLabel
+                anchors.margins: -4
+                color: "#80000000"
+            }
+
+            Text {
+                id: sizeLabel
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.margins: 8 * screenImage.factor
+                text: "%1:%2 %3:%4".arg(selectionRect.x).arg(selectionRect.y)
+                                   .arg(selectionRect.width).arg(selectionRect.height)
+                color: "white"
+                font.pixelSize: 16 * screenImage.factor
+            }
         }
     }
 
     TreeView {
+        id: myTreeView
         anchors.fill: parent
-        anchors.leftMargin: 720
+        anchors.leftMargin: screenImage.width
         model: myModel
         itemDelegate: Item {
             Text {
@@ -36,18 +61,17 @@ ApplicationWindow {
         }
 
         onCurrentIndexChanged: {
-            console.log(myModel.getRect(currentIndex))
-            var rect = myModel.getRect(currentIndex)
-            selectionRect.x = rect.x
-            selectionRect.y = rect.y
-            selectionRect.width = rect.width
-            selectionRect.height = rect.height
+            screenImage.selection = myModel.getRect(currentIndex)
+        }
+
+        onClicked: {
+            myTreeView.expand(index)
         }
 
         TableViewColumn {
-            role: "id"
-            title: "ObjectId"
-            width: 800
+            role: "classname"
+            title: "Classname"
+            width: 400
         }
 
         TableViewColumn {
@@ -69,57 +93,69 @@ ApplicationWindow {
         }
 
         TableViewColumn {
+            role: "label"
+            title: "Label"
+            width: 100
+        }
+
+        TableViewColumn {
+            role: "placeholderText"
+            title: "Placeholder"
+            width: 100
+        }
+
+        TableViewColumn {
             role: "enabled"
-            title: "Enabled"
-            width: 40
+            title: "ena"
+            width: 30
         }
 
         TableViewColumn {
             role: "visible"
-            title: "Visible"
-            width: 40
-        }
-
-        TableViewColumn {
-            role: "x"
-            title: "X"
-            width: 40
-        }
-
-        TableViewColumn {
-            role: "y"
-            title: "Y"
-            width: 40
-        }
-
-        TableViewColumn {
-            role: "z"
-            title: "Z"
-            width: 40
+            title: "vis"
+            width: 30
         }
 
         TableViewColumn {
             role: "abs_x"
-            title: "AbsX"
+            title: "abx"
             width: 40
         }
 
         TableViewColumn {
             role: "abs_y"
-            title: "AbsY"
+            title: "aby"
             width: 40
         }
 
         TableViewColumn {
             role: "width"
-            title: "Width"
+            title: "wid"
             width: 50
         }
 
         TableViewColumn {
             role: "height"
-            title: "Height"
+            title: "hei"
             width: 50
+        }
+
+        TableViewColumn {
+            role: "x"
+            title: "x"
+            width: 40
+        }
+
+        TableViewColumn {
+            role: "y"
+            title: "y"
+            width: 40
+        }
+
+        TableViewColumn {
+            role: "z"
+            title: "z"
+            width: 40
         }
     }
 }
