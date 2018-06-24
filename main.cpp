@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
     if (engine.rootObjects().isEmpty())
         return -1;
 
-    DBusConnector conn(&app);
-    QTimer::singleShot(0, &conn, &DBusConnector::init);
+//    DBusConnector conn(&app);
+//    QTimer::singleShot(0, &conn, &DBusConnector::init);
 
     return app.exec();
 }
