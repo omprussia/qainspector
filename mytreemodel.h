@@ -49,6 +49,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE QRect getRect(const QModelIndex &index);
+    Q_INVOKABLE void copyToClipboard(const QModelIndex &index);
 
 public slots:
     void fillModel(const QJsonObject &object);

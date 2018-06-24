@@ -68,6 +68,10 @@ ApplicationWindow {
             myTreeView.expand(index)
         }
 
+        onDoubleClicked: {
+            myModel.copyToClipboard(index)
+        }
+
         TableViewColumn {
             role: "classname"
             title: "Classname"

@@ -4,6 +4,9 @@
 #include <QDebug>
 #include <QJsonDocument>
 
+#include <QGuiApplication>
+#include <QClipboard>
+
 MyTreeModel::MyTreeModel(const QJsonObject &data, QObject *parent)
     : QAbstractItemModel(parent)
 {
@@ -179,6 +182,18 @@ QRect MyTreeModel::getRect(const QModelIndex &index)
     rect.setHeight(item->data("height").toInt());
 
     return rect;
+}
+
+void MyTreeModel::copyToClipboard(const QModelIndex &index)
+{
+    QRect rect;
+    if (!index.isValid()) {
+        return;
+    }
+
+    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+
+    qGuiApp->clipboard()->setText(item->data("id").toString());
 }
 
 
