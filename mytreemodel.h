@@ -2,7 +2,7 @@
 #define MYTREEMODEL_H
 
 #include <QAbstractItemModel>
-#include <QJSonObject>
+#include <QJsonObject>
 #include <QRect>
 
 class TreeItem
@@ -35,7 +35,7 @@ class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit MyTreeModel(const QJsonObject &data, QObject *parent = nullptr);
+    explicit MyTreeModel(QObject *parent = nullptr);
 
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
@@ -53,6 +53,7 @@ public:
 
 public slots:
     void fillModel(const QJsonObject &object);
+    void loadDump(const QString &dump);
 
 private:
     QList<TreeItem*> processChilds(const QJsonArray &data, TreeItem *parentItem);

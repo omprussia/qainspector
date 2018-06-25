@@ -7,14 +7,17 @@
 #include <QGuiApplication>
 #include <QClipboard>
 
-MyTreeModel::MyTreeModel(const QJsonObject &data, QObject *parent)
+MyTreeModel::MyTreeModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
-    fillModel(data);
+    qDebug() << Q_FUNC_INFO;
 }
 
 void MyTreeModel::fillModel(const QJsonObject &object)
 {
+    qDebug() << Q_FUNC_INFO << object.value("id").toVariant();
+
+    beginResetModel();
 
     if (m_rootItem) {
         delete m_rootItem;
@@ -30,12 +33,12 @@ void MyTreeModel::fillModel(const QJsonObject &object)
     m_roles.clear();
     int role = Qt::UserRole;
 
+    qDebug() << m_roleNames;
+
     for (const QString &roleName : m_roleNames) {
         rootMap[roleName] = roleName;
         m_roles[++role] = roleName.toLatin1();
     }
-
-    beginResetModel();
 
     const QJsonObject rootData = QJsonDocument::fromVariant(rootMap).object();
 
@@ -50,6 +53,14 @@ void MyTreeModel::fillModel(const QJsonObject &object)
     }
 
     endResetModel();
+}
+
+void MyTreeModel::loadDump(const QString &dump)
+{
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(dump.toLatin1(), &error);
+    qDebug() << error.errorString();
+    fillModel(doc.object());
 }
 
 QList<TreeItem *> MyTreeModel::processChilds(const QJsonArray &data, TreeItem *parentItem)
@@ -70,6 +81,8 @@ QList<TreeItem *> MyTreeModel::processChilds(const QJsonArray &data, TreeItem *p
 
 QVariant MyTreeModel::data(const QModelIndex &index, int role) const
 {
+    qDebug() << Q_FUNC_INFO << index << role;
+
     if (!index.isValid()) {
         return QVariant();
     }
@@ -85,6 +98,8 @@ QVariant MyTreeModel::data(const QModelIndex &index, int role) const
 
 Qt::ItemFlags MyTreeModel::flags(const QModelIndex &index) const
 {
+    qDebug() << Q_FUNC_INFO << index;
+
     if (!index.isValid()) {
         return Qt::NoItemFlags;
     }
@@ -94,6 +109,8 @@ Qt::ItemFlags MyTreeModel::flags(const QModelIndex &index) const
 
 QVariant MyTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    qDebug() << Q_FUNC_INFO << section << orientation << role;
+
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
         return m_rootItem->data(m_roleNames[section]);
     }
@@ -103,6 +120,8 @@ QVariant MyTreeModel::headerData(int section, Qt::Orientation orientation, int r
 
 QModelIndex MyTreeModel::index(int row, int column, const QModelIndex &parent) const
 {
+    qDebug() << Q_FUNC_INFO << row << column << parent;
+
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
@@ -125,6 +144,8 @@ QModelIndex MyTreeModel::index(int row, int column, const QModelIndex &parent) c
 
 QModelIndex MyTreeModel::parent(const QModelIndex &index) const
 {
+    qDebug() << Q_FUNC_INFO << index;
+
     if (!index.isValid()) {
         return QModelIndex();
     }
@@ -141,7 +162,13 @@ QModelIndex MyTreeModel::parent(const QModelIndex &index) const
 
 int MyTreeModel::rowCount(const QModelIndex &parent) const
 {
+    qDebug() << Q_FUNC_INFO << parent;
+
     if (parent.column() > 0) {
+        return 0;
+    }
+
+    if (!m_rootItem) {
         return 0;
     }
 
@@ -156,6 +183,8 @@ int MyTreeModel::rowCount(const QModelIndex &parent) const
 
 int MyTreeModel::columnCount(const QModelIndex &parent) const
 {
+    qDebug() << Q_FUNC_INFO << parent;
+
     if (parent.isValid()) {
         return static_cast<TreeItem*>(parent.internalPointer())->columnCount();
     }
@@ -165,6 +194,8 @@ int MyTreeModel::columnCount(const QModelIndex &parent) const
 
 QHash<int, QByteArray> MyTreeModel::roleNames() const
 {
+    qDebug() << Q_FUNC_INFO;
+
     return m_roles;
 }
 
@@ -186,7 +217,6 @@ QRect MyTreeModel::getRect(const QModelIndex &index)
 
 void MyTreeModel::copyToClipboard(const QModelIndex &index)
 {
-    QRect rect;
     if (!index.isValid()) {
         return;
     }
