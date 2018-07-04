@@ -46,6 +46,20 @@ ApplicationWindow {
         }
 
         Button {
+            text: "Dump tree"
+            visible: connection.connected
+            onClicked: {
+                connection.getDumpTree(function(dump) {
+                    myModel.loadDump(dump)
+                })
+                connection.getGrabWindow(function(ok) {
+                    screenImage.source = ""
+                    screenImage.source = myImage
+                })
+            }
+        }
+
+        Button {
             text: "Dump page"
             visible: connection.connected
             onClicked: {

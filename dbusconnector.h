@@ -21,8 +21,8 @@ public:
     Q_PROPERTY(QString applicationName MEMBER m_applicationName NOTIFY applicationNameChanged)
 
 public slots:
-    QJsonObject getDumpTree();
     void getDumpPage(QJSValue callback);
+    void getDumpTree(QJSValue callback);
 
     void getGrabWindow(QJSValue callback);
 

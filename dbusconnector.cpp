@@ -43,17 +43,32 @@ void DBusConnector::setConnected(bool connected)
     }
 }
 
-QJsonObject DBusConnector::getDumpTree()
-{
-
-}
-
 void DBusConnector::getDumpPage(QJSValue callback)
 {
     QDBusMessage msg = QDBusMessage::createMethodCall(c_serviceName.arg(m_applicationName),
                                                       QStringLiteral("/ru/omprussia/qaservice"),
                                                       QStringLiteral("ru.omprussia.qaservice"),
                                                       QStringLiteral("dumpCurrentPage"));
+    QDBusPendingCall async = m_connection.asyncCall(msg);
+    QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
+
+    connect(watcher, &QDBusPendingCallWatcher::finished, [callback](QDBusPendingCallWatcher *watcher) mutable {
+        watcher->deleteLater();
+        const QString dump = QDBusPendingReply<QString>(*watcher);
+        if (callback.isCallable()) {
+            callback.call({ QJSValue(dump) });
+        } else {
+            qDebug() << Q_FUNC_INFO << dump;
+        }
+    });
+}
+
+void DBusConnector::getDumpTree(QJSValue callback)
+{
+    QDBusMessage msg = QDBusMessage::createMethodCall(c_serviceName.arg(m_applicationName),
+                                                      QStringLiteral("/ru/omprussia/qaservice"),
+                                                      QStringLiteral("ru.omprussia.qaservice"),
+                                                      QStringLiteral("dumpTree"));
     QDBusPendingCall async = m_connection.asyncCall(msg);
     QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
 
