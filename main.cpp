@@ -22,9 +22,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
 
     QFileInfo png("dump.png");
-    if (png.exists()) {
-        engine.rootContext()->setContextProperty("myImage", QUrl::fromLocalFile(png.absoluteFilePath()));
-    }
+    engine.rootContext()->setContextProperty("myImage", QUrl::fromLocalFile(png.absoluteFilePath()));
 
     engine.load(QUrl(QLatin1String("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())

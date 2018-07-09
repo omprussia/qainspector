@@ -1,7 +1,8 @@
 import QtQuick 2.7
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 1.4 as ControlsOld
+import QtQuick.Controls.Styles 1.4 as StylesOld
 import QtQuick.Layouts 1.3
+import QtQuick.Controls 2.1
 
 import ru.omprussia.qainspector 1.0
 
@@ -122,29 +123,25 @@ ApplicationWindow {
         id: myModel
     }
 
-    TreeView {
+    ControlsOld.TreeView {
         id: myTreeView
         anchors.fill: parent
         anchors.topMargin: controlsRow.height
         anchors.leftMargin: screenBackground.width
         model: myModel
 
-        alternatingRowColors: false
+        style: StylesOld.TreeViewStyle {
+            activateItemOnSingleClick: true
+            backgroundColor: "#20aaaaaa"
+            alternateBackgroundColor: "#40aaaaaa"
+            textColor: "#000000"
+        }
+
         itemDelegate: Item {
             Text {
                 anchors.verticalCenter: parent.verticalCenter
-//                color: styleData.textColor
-//                elide: styleData.elideMode
-                text: styleData.value
-            }
-        }
-        headerDelegate: Rectangle {
-            height: 20
-            color: "gray"
-            border.width: 1
-            border.color: "#40ffffff"
-            Text {
-                color: "white"
+                color: styleData.textColor
+                elide: styleData.elideMode
                 text: styleData.value
             }
         }
@@ -153,99 +150,99 @@ ApplicationWindow {
             screenBackground.selection = myModel.getRect(currentIndex)
         }
 
-        onClicked: {
-            myTreeView.expand(index)
-        }
+//        onClicked: {
+//            myTreeView.expand(index)
+//        }
 
         onDoubleClicked: {
             myModel.copyToClipboard(index)
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "classname"
             title: "Classname"
             width: 400
         }
 
-        TableViewColumn {
-            role: "name"
-            title: "Name"
-            width: 100
-        }
-
-        TableViewColumn {
-            role: "text"
-            title: "Text"
-            width: 100
-        }
-
-        TableViewColumn {
-            role: "title"
-            title: "Title"
-            width: 100
-        }
-
-        TableViewColumn {
-            role: "label"
-            title: "Label"
-            width: 100
-        }
-
-        TableViewColumn {
-            role: "placeholderText"
-            title: "Placeholder"
-            width: 100
-        }
-
-        TableViewColumn {
-            role: "enabled"
-            title: "ena"
-            width: 30
-        }
-
-        TableViewColumn {
-            role: "visible"
-            title: "vis"
-            width: 30
-        }
-
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "abs_x"
             title: "abx"
             width: 40
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "abs_y"
             title: "aby"
             width: 40
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
+            role: "name"
+            title: "Name"
+            width: 100
+        }
+
+        ControlsOld.TableViewColumn {
+            role: "text"
+            title: "Text"
+            width: 100
+        }
+
+        ControlsOld.TableViewColumn {
+            role: "title"
+            title: "Title"
+            width: 100
+        }
+
+        ControlsOld.TableViewColumn {
+            role: "label"
+            title: "Label"
+            width: 100
+        }
+
+        ControlsOld.TableViewColumn {
+            role: "placeholderText"
+            title: "Placeholder"
+            width: 100
+        }
+
+        ControlsOld.TableViewColumn {
+            role: "enabled"
+            title: "ena"
+            width: 30
+        }
+
+        ControlsOld.TableViewColumn {
+            role: "visible"
+            title: "vis"
+            width: 30
+        }
+
+        ControlsOld.TableViewColumn {
             role: "width"
             title: "wid"
             width: 50
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "height"
             title: "hei"
             width: 50
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "x"
             title: "x"
             width: 40
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "y"
             title: "y"
             width: 40
         }
 
-        TableViewColumn {
+        ControlsOld.TableViewColumn {
             role: "z"
             title: "z"
             width: 40
