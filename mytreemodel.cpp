@@ -193,6 +193,23 @@ QRect MyTreeModel::getRect(const QModelIndex &index)
     return rect;
 }
 
+QVariantList MyTreeModel::getDataList(const QModelIndex &index)
+{
+    if (!index.isValid()) {
+        return QVariantList();
+    }
+
+    QVariantList dataList;
+
+    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+    const QJsonObject jsonData = item->data();
+    for (const QString &key : jsonData.keys()) {
+        dataList.append(QVariantMap({{"name", key}, {"value", jsonData.value(key).toVariant()}}));
+    }
+
+    return dataList;
+}
+
 void MyTreeModel::copyToClipboard(const QModelIndex &index)
 {
     if (!index.isValid()) {
@@ -239,6 +256,11 @@ int TreeItem::childCount() const
 QVariant TreeItem::data(const QString &roleName) const
 {
     return m_data.value(roleName).toVariant();
+}
+
+QJsonObject TreeItem::data() const
+{
+    return m_data;
 }
 
 int TreeItem::columnCount() const

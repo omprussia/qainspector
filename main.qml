@@ -7,10 +7,56 @@ import QtQuick.Controls 2.1
 import ru.omprussia.qainspector 1.0
 
 ApplicationWindow {
+    id: myWindow
     visible: true
     width: 640
     height: 480
     title: qsTr("Hello World")
+
+    Component {
+        id: popupComponent
+        Popup {
+            id: popup
+            modal: true
+            focus: true
+            width: popupList.width + 25
+            height: popupList.height + 25
+            clip: true
+
+            property alias model: popupRepeater.model
+
+            Component.onCompleted: open()
+            onClosed: popup.destroy()
+
+            Flickable {
+                id: popupList
+                width: popupColumn.width
+                height: 600
+                contentHeight: popupColumn.height
+                Column {
+                    id: popupColumn
+                    Repeater {
+                        id: popupRepeater
+                        delegate: Row {
+                            height: 20
+                            spacing: 4
+                            onWidthChanged: if (popupColumn.width < width) popupColumn.width = width
+                            Label {
+                                text: modelData.name
+                            }
+                            Label {
+                                text: ":"
+                            }
+                            Label {
+                                Layout.fillWidth: true
+                                text: modelData.value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     RemoteConnection {
         id: connection
@@ -150,9 +196,16 @@ ApplicationWindow {
             screenBackground.selection = myModel.getRect(currentIndex)
         }
 
-//        onClicked: {
+        onPressAndHold: {
 //            myTreeView.expand(index)
-//        }
+            var dataList = myModel.getDataList(index)
+            popupComponent.createObject(myWindow,
+                                        {
+                                            model: dataList,
+                                            x: myTreeView.x + 16,
+                                            y: myTreeView.y + 16
+                                        })
+        }
 
         onDoubleClicked: {
             myModel.copyToClipboard(index)
@@ -177,32 +230,8 @@ ApplicationWindow {
         }
 
         ControlsOld.TableViewColumn {
-            role: "name"
-            title: "Name"
-            width: 100
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "text"
+            role: "mainTextProperty"
             title: "Text"
-            width: 100
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "title"
-            title: "Title"
-            width: 100
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "label"
-            title: "Label"
-            width: 100
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "placeholderText"
-            title: "Placeholder"
             width: 100
         }
 
@@ -228,24 +257,6 @@ ApplicationWindow {
             role: "height"
             title: "hei"
             width: 50
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "x"
-            title: "x"
-            width: 40
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "y"
-            title: "y"
-            width: 40
-        }
-
-        ControlsOld.TableViewColumn {
-            role: "z"
-            title: "z"
-            width: 40
         }
     }
 }

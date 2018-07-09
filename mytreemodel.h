@@ -16,6 +16,7 @@ public:
     int childCount() const;
 
     QVariant data(const QString &roleName) const;
+    QJsonObject data() const;
     int columnCount() const;
 
     int row();
@@ -49,6 +50,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE QRect getRect(const QModelIndex &index);
+    Q_INVOKABLE QVariantList getDataList(const QModelIndex &index);
     Q_INVOKABLE void copyToClipboard(const QModelIndex &index);
 
 public slots:
