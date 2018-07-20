@@ -73,18 +73,21 @@ ApplicationWindow {
             id: hostField
             placeholderText: "192.168.2.15"
             text: placeholderText
+            selectByMouse: true
         }
 
         TextField {
             id: portField
             placeholderText: "55556"
             text: placeholderText
+            selectByMouse: true
         }
 
         TextField {
             id: applicationField
             placeholderText: "jolla-settings"
             text: placeholderText
+            selectByMouse: true
         }
 
         Button {
