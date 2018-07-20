@@ -16,28 +16,29 @@ void MyTreeModel::fillModel(const QJsonObject &object)
 {
     beginResetModel();
 
-    if (m_rootItem) {
-        delete m_rootItem;
-        m_rootItem = nullptr;
-    }
-
     QJsonObject data = object;
     const QJsonArray childsData = data.take(QStringLiteral("children")).toArray();
 
     QVariantMap rootMap;
 
-    m_roleNames = data.keys();
-    m_roles.clear();
-    int role = Qt::UserRole;
+    if (m_roleNames.isEmpty()) {
+        m_roleNames = data.keys();
+        int role = Qt::UserRole;
 
-    for (const QString &roleName : m_roleNames) {
-        rootMap[roleName] = roleName;
-        m_roles[++role] = roleName.toLatin1();
+        for (const QString &roleName : m_roleNames) {
+            rootMap[roleName] = roleName;
+            m_roles[++role] = roleName.toLatin1();
+        }
     }
 
     const QJsonObject rootData = QJsonDocument::fromVariant(rootMap).object();
 
-    m_rootItem = new TreeItem(rootData);
+
+    if (!m_rootItem) {
+        m_rootItem = new TreeItem(rootData);
+    } else {
+        m_rootItem->genocide();
+    }
 
     TreeItem *firstItem = new TreeItem(data, m_rootItem);
     m_rootItem->appendChild(firstItem);
@@ -53,8 +54,12 @@ void MyTreeModel::fillModel(const QJsonObject &object)
 void MyTreeModel::loadDump(const QString &dump)
 {
     QJsonParseError error;
-    QJsonDocument doc = QJsonDocument::fromJson(dump.toLatin1(), &error);
-    fillModel(doc.object());
+    QJsonDocument doc = QJsonDocument::fromJson(dump.toUtf8(), &error);
+    if (error.error == QJsonParseError::NoError) {
+        fillModel(doc.object());
+    } else {
+        qWarning() << Q_FUNC_INFO << error.errorString();
+    }
 }
 
 QList<TreeItem *> MyTreeModel::processChilds(const QJsonArray &data, TreeItem *parentItem)
@@ -248,9 +253,20 @@ TreeItem *TreeItem::child(int index)
     return m_childs.value(index);
 }
 
+QVector<TreeItem*> TreeItem::childs()
+{
+    return m_childs;
+}
+
 int TreeItem::childCount() const
 {
     return m_childs.count();
+}
+
+void TreeItem::genocide()
+{
+    qDeleteAll(m_childs);
+    m_childs.clear();
 }
 
 QVariant TreeItem::data(const QString &roleName) const

@@ -13,7 +13,10 @@ public:
 
     void appendChild(TreeItem *child);
     TreeItem *child(int index);
+    QVector<TreeItem *> childs();
     int childCount() const;
+
+    void genocide();
 
     QVariant data(const QString &roleName) const;
     QJsonObject data() const;
