@@ -166,6 +166,17 @@ ApplicationWindow {
                 font.pixelSize: 16 * screenBackground.factor
             }
         }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                pointRect.posx = mouse.x
+                pointRect.posy = mouse.y
+                pointRect.visible = true
+
+                console.log(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
+            }
+        }
     }
 
     ItemsTreeModes {
@@ -260,6 +271,45 @@ ApplicationWindow {
             role: "height"
             title: "hei"
             width: 50
+        }
+    }
+
+    Rectangle {
+        id: pointRect
+        color: "transparent"
+        border.width: 2
+        border.color: "white"
+        visible: false
+        property int posx: 0
+        property int posy: 0
+        width: pointText.paintedWidth + 8
+        height: pointText.paintedHeight + 8
+        x: screenBackground.x + posx
+        y: screenBackground.y + posy
+
+        Rectangle {
+            anchors.verticalCenter: parent.top
+            anchors.horizontalCenter: parent.left
+            color: "red"
+            width: 4
+            height: 4
+            radius: 2
+        }
+
+        Rectangle {
+            anchors.fill: pointText
+            anchors.margins: -4
+            color: "#80000000"
+        }
+
+        Text {
+            id: pointText
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.margins: 4
+            text: "%1:%2".arg(pointRect.posx / screenBackground.factor).arg(pointRect.posy / screenBackground.factor)
+            color: "white"
+            font.pixelSize: 22 * screenBackground.factor
         }
     }
 }
