@@ -318,6 +318,12 @@ ApplicationWindow {
         }
 
         ControlsOld.TableViewColumn {
+            role: "objectName"
+            title: "ObjectName"
+            width: 100
+        }
+
+        ControlsOld.TableViewColumn {
             role: "enabled"
             title: "ena"
             width: 30
