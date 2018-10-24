@@ -58,8 +58,15 @@ ApplicationWindow {
         }
     }
 
-    RemoteConnection {
-        id: connection
+    DBusConnection {
+        id: busconnection
+        hostname: hostField.text
+        port: portField.text
+        applicationName: applicationField.text
+    }
+
+    SocketConnection {
+        id: socketconnection
         hostname: hostField.text
         port: portField.text
         applicationName: applicationField.text
@@ -78,7 +85,7 @@ ApplicationWindow {
 
         TextField {
             id: portField
-            placeholderText: "55556"
+            placeholderText: dbus.checked ? "55556" : "8888"
             text: placeholderText
             selectByMouse: true
         }
@@ -91,18 +98,26 @@ ApplicationWindow {
         }
 
         Button {
-            text: connection.connected ? "Disconnect" : "Connect"
-            onClicked: connection.connected = !connection.connected
+            visible: dbus.checked
+            text: busconnection.connected ? "Disconnect" : "Connect"
+            onClicked: {
+                if (dbus.checked) {
+                    busconnection.connected = !busconnection.connected
+                } else {
+                    socketconnection.connected = !socketconnection.connected
+                }
+
+            }
         }
 
         Button {
             text: "Dump tree"
-            visible: connection.connected
+            visible: dbus.checked && busconnection.connected
             onClicked: {
-                connection.getDumpTree(function(dump) {
+                busconnection.getDumpTree(function(dump) {
                     myModel.loadDump(dump)
                 })
-                connection.getGrabWindow(function(ok) {
+                busconnection.getGrabWindow(function(ok) {
                     screenImage.source = ""
                     screenImage.source = myImage
                 })
@@ -111,15 +126,68 @@ ApplicationWindow {
 
         Button {
             text: "Dump page"
-            visible: connection.connected
+            visible: dbus.checked && busconnection.connected
             onClicked: {
-                connection.getDumpPage(function(dump) {
+                busconnection.getDumpPage(function(dump) {
                     myModel.loadDump(dump)
                 })
-                connection.getGrabWindow(function(ok) {
+                busconnection.getGrabWindow(function(ok) {
                     screenImage.source = ""
                     screenImage.source = myImage
                 })
+            }
+        }
+
+        Button {
+            visible: socket.checked
+            text: socketconnection.connected ? "Disconnect" : "Connect"
+            onClicked: socketconnection.connected = !socketconnection.connected
+        }
+
+        Button {
+            text: "Dump tree"
+            visible: socket.checked && socketconnection.connected
+            onClicked: {
+                socketconnection.getDumpTree(function(dump) {
+                    myModel.loadDump(dump)
+                })
+                socketconnection.getGrabWindow(function(ok) {
+                    screenImage.source = ""
+                    screenImage.source = myImage
+                })
+            }
+        }
+
+        Button {
+            text: "Dump page"
+            visible: socket.checked && socketconnection.connected
+            onClicked: {
+                socketconnection.getDumpPage(function(dump) {
+                    myModel.loadDump(dump)
+                })
+                socketconnection.getGrabWindow(function(ok) {
+                    screenImage.source = ""
+                    screenImage.source = myImage
+                })
+            }
+        }
+
+        RadioButton {
+            id: dbus
+            text: "DBus"
+            onCheckedChanged: {
+                socketconnection.connected = false
+                busconnection.connected = false
+            }
+        }
+
+        RadioButton {
+            id: socket
+            text: "Socket"
+            checked: true
+            onCheckedChanged: {
+                socketconnection.connected = false
+                busconnection.connected = false
             }
         }
     }
@@ -213,7 +281,7 @@ ApplicationWindow {
         onPressAndHold: {
 //            myTreeView.expand(index)
             var dataList = myModel.getDataList(index)
-            popupComponent.createObject(myWindow,
+            popupComponent.createObject(myWindow.contentItem,
                                         {
                                             model: dataList,
                                             x: myTreeView.x + 16,

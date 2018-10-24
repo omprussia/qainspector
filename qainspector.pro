@@ -14,7 +14,8 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += main.cpp \
     mytreemodel.cpp \
-    dbusconnector.cpp
+    dbusconnector.cpp \
+    socketconnector.cpp
 
 RESOURCES += qml.qrc
 
@@ -31,4 +32,5 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 HEADERS += \
     mytreemodel.h \
-    dbusconnector.h
+    dbusconnector.h \
+    socketconnector.h
