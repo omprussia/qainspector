@@ -9,10 +9,6 @@ SocketConnector::SocketConnector(QObject *parent)
     , m_socket(new QTcpSocket(this))
 {
     connect(m_socket, &QTcpSocket::connected, [this](){
-        qWarning() << Q_FUNC_INFO << "connected";
-        emit connectedChanged(true);
-
-
         QJsonObject json;
         json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
         json.insert(QStringLiteral("action"), QJsonValue(QStringLiteral("initialize")));
@@ -38,6 +34,9 @@ SocketConnector::SocketConnector(QObject *parent)
 
         m_socket->waitForReadyRead(500);
         m_socket->readAll();
+
+        qWarning() << Q_FUNC_INFO << "connected";
+        emit connectedChanged(true);
     });
     connect(m_socket, &QTcpSocket::disconnected, [this](){
         qWarning() << Q_FUNC_INFO << "disconnected";
@@ -52,16 +51,17 @@ bool SocketConnector::isConnected() const
 
 void SocketConnector::setConnected(bool connected)
 {
-    qDebug() << Q_FUNC_INFO << isConnected() << m_hostName << m_hostPort;
+    qDebug() << Q_FUNC_INFO << m_hostName << m_hostPort;
     const bool lastConnected = isConnected();
 
     if (!connected && lastConnected) {
         m_socket->close();
     } else if (connected && !lastConnected) {
         m_socket->connectToHost(m_hostName, m_hostPort.toUShort());
+        qDebug() << Q_FUNC_INFO << "Connecting:" << m_socket->waitForConnected(3000);
     }
 
-    qDebug() << Q_FUNC_INFO << connected << isConnected();
+    qDebug() << Q_FUNC_INFO << "Set connect:" << connected << "Connected:" << isConnected();
 }
 
 void SocketConnector::getDumpPage(QJSValue callback)
