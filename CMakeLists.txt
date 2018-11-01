@@ -8,7 +8,7 @@ set(QT_MIN_VERSION "5.11.0")
 find_package(ECM 5.40.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
-find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core DBus Quick Widgets QuickControls2 Network)
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core DBus Quick QuickControls2 Network)
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -31,6 +31,6 @@ add_executable(qainspector ${qainspector_SRCS}
 
 set_target_properties(qainspector PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR}/qainspector)
 
-target_link_libraries(qainspector LINK_PUBLIC Qt5::QuickControls2 Qt5::Widgets Qt5::Network Qt5::Quick Qt5::DBus Qt5::Core)
+target_link_libraries(qainspector LINK_PUBLIC Qt5::QuickControls2 Qt5::Network Qt5::Quick Qt5::DBus Qt5::Core)
 
 install(TARGETS qainspector ${INSTALL_TARGETS_DEFAULT_ARGS})

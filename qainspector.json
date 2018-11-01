@@ -1,27 +1,24 @@
 {
-  "id" : "ru.omprussia.qainspector",
-  "branch" : "stable",
-  "runtime" : "org.kde.Platform",
-  "runtime-version" : "5.11",
-  "sdk" : "org.kde.Sdk",
-  "command" : "qainspector",
-  "modules" : [
+  "app-id": "ru.omprussia.qainspector",
+  "id": "ru.omprussia.qainspector",
+  "branch": "stable",
+  "runtime": "org.kde.Platform",
+  "runtime-version": "5.11",
+  "sdk": "org.kde.Sdk",
+  "command": "qainspector",
+  "modules": [
     {
-      "name" : "qainspector",
-      "buildsystem" : "cmake-ninja",
-      "config-opts" : [
-        "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
-      ],
-      "sources" : [
+      "name": "qainspector",
+      "buildsystem": "cmake-ninja",
+      "sources": [
         {
-          "path" : "/home/OMP/d.patrakov/flatpack-build-path/qainspector.tar.gz",
-          "sha256" : "090ea1a5f221a9409b752155a9fe484317e4a6771904c1018bc5f37cfb18ed65",
-          "type" : "archive"
+          "type": "dir",
+          "path": "."
         }
       ]
     }
   ],
-  "finish-args" : [
+  "finish-args": [
     "--socket=session-bus",
     "--socket=system-bus",
     "--share=network",

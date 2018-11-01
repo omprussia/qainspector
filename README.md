@@ -1,9 +1,32 @@
-qainspector
+# qainspector
 
-flatpak build command:
-flatpak-builder --user --install ru.omprussia.qainspector/ qainspector.json -v
+## prepare
 
-flatpak run command:
-flatpak run --user ru.omprussia.qainspector
+```
+sudo add-apt-repository ppa:alexlarsson/flatpak
+sudo apt install flatpak flatpak-builder
+
+flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+flatpak install --user flathub org.kde.Sdk/x86_64/5.11 org.kde.Platform/x86_64/5.11
+```
+
+## build
+
+```
+flatpak-builder --user --install-deps-from=flathub --force-clean --repo=repo qainspector qainspector.json
+flatpak build-bundle --runtime-repo=https://flathub.org/repo/flathub.flatpakrepo $(pwd)/repo qainspector.flatpak ru.omprussia.qainspector stable
+```
+
+## install
+
+```
+flatpak --user install qainspector.flatpak
+```
+
+## run
+
+```
+flatpak --user run ru.omprussia.qainspector
+```
 
 
