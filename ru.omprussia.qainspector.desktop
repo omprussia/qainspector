@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=QA Inspector
+Comment=QA Inspector
+TryExec=ru.omprussia.qainspector
+Exec=ru.omprussia.qainspector -- %u
+Icon=ru.omprussia.qainspector
+Terminal=false
+Type=Application
+Categories=Network;Development;Qt;
+X-Desktop-File-Install-Version=0.23
