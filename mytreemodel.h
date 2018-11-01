@@ -41,6 +41,7 @@ class MyTreeModel : public QAbstractItemModel
 public:
     explicit MyTreeModel(QObject *parent = nullptr);
 
+    QMap<int, QVariant> itemData(const QModelIndex &index) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant headerData(int section, Qt::Orientation orientation,

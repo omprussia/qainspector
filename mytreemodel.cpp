@@ -78,6 +78,22 @@ QList<TreeItem *> MyTreeModel::processChilds(const QJsonArray &data, TreeItem *p
     return childs;
 }
 
+QMap<int, QVariant> MyTreeModel::itemData(const QModelIndex &index) const
+{
+    if (!index.isValid() || index.row() < rowCount()) {
+        return {};
+    }
+
+    TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
+
+    QMap<int, QVariant> data;
+    int roleIndex = Qt::UserRole;
+    for (const QString &roleName : m_roleNames) {
+        data.insert(++roleIndex, item->data(roleName));
+    }
+    return data;
+}
+
 QVariant MyTreeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid()) {

@@ -23,7 +23,7 @@ SocketConnector::SocketConnector(QObject *parent)
         m_socket->write(QByteArrayLiteral("\n"));
         m_socket->waitForBytesWritten();
 
-        m_socket->waitForReadyRead(3000);
+        m_socket->waitForReadyRead(500);
         m_socket->readAll();
 
         QJsonObject json2;
@@ -36,7 +36,7 @@ SocketConnector::SocketConnector(QObject *parent)
         m_socket->write(QByteArrayLiteral("\n"));
         m_socket->waitForBytesWritten();
 
-        m_socket->waitForReadyRead(3000);
+        m_socket->waitForReadyRead(500);
         m_socket->readAll();
     });
     connect(m_socket, &QTcpSocket::disconnected, [this](){
@@ -58,7 +58,7 @@ void SocketConnector::setConnected(bool connected)
     if (!connected && lastConnected) {
         m_socket->close();
     } else if (connected && !lastConnected) {
-        m_socket->connectToHost(m_hostName, m_hostPort.toInt());
+        m_socket->connectToHost(m_hostName, m_hostPort.toUShort());
     }
 
     qDebug() << Q_FUNC_INFO << connected << isConnected();
