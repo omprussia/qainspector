@@ -67,9 +67,10 @@ void SocketConnector::setConnected(bool connected)
 void SocketConnector::getDumpPage(QJSValue callback)
 {
     QJsonObject json;
+
     json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
     json.insert(QStringLiteral("action"), QJsonValue(QStringLiteral("execute")));
-    json.insert(QStringLiteral("params"), QJsonValue::fromVariant(QStringList( {QStringLiteral("app:dumpCurrentPage"), QString() })));
+    json.insert(QStringLiteral("params"), QJsonValue::fromVariant(QVariantList{QStringLiteral("app:dumpCurrentPage"), QVariantList{}} ));
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
@@ -106,7 +107,7 @@ void SocketConnector::getDumpTree(QJSValue callback)
     QJsonObject json;
     json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
     json.insert(QStringLiteral("action"), QJsonValue(QStringLiteral("execute")));
-    json.insert(QStringLiteral("params"), QJsonValue::fromVariant(QStringList( {QStringLiteral("app:dumpTree"), QString() })));
+    json.insert(QStringLiteral("params"), QJsonValue::fromVariant( QVariantList{QStringLiteral("app:dumpTree"), QVariantList{}} ));
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
