@@ -46,3 +46,5 @@ dump\.png
 *.flatpak
 
 ru\.omprussia\.qainspector/
+
+build/
