@@ -22,19 +22,6 @@ SocketConnector::SocketConnector(QObject *parent)
         m_socket->waitForReadyRead(500);
         m_socket->readAll();
 
-        QJsonObject json2;
-        json2.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
-        json2.insert(QStringLiteral("action"), QJsonValue(QStringLiteral("appConnect")));
-        json2.insert(QStringLiteral("params"), QJsonValue::fromVariant(QStringList()));
-        const QByteArray data2 = QJsonDocument(json2).toJson(QJsonDocument::Compact);
-
-        m_socket->write(data2);
-        m_socket->write(QByteArrayLiteral("\n"));
-        m_socket->waitForBytesWritten();
-
-        m_socket->waitForReadyRead(500);
-        m_socket->readAll();
-
         qWarning() << Q_FUNC_INFO << "connected";
         emit connectedChanged(true);
     });
