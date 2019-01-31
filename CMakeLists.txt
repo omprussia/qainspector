@@ -1,9 +1,15 @@
-project(qainspector)
+cmake_minimum_required(VERSION 3.1)
 
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
-set(QT_MIN_VERSION "5.11.0")
+project(qainspector LANGUAGES CXX)
 
-################# set KDE specific information #################
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(QT_MIN_VERSION "5.12.0")
+set(CMAKE_BUILD_TYPE MinSizeRel)
 
 find_package(ECM 5.40.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
@@ -14,19 +20,15 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 
-include(ECMPackageConfigHelpers)
+include(CMakePackageConfigHelpers)
 include(ECMOptionalAddSubdirectory)
 
-include_directories(${Qt5Core_PRIVATE_INCLUDE_DIRS})
-
-qt5_add_resources(${PROJECT_NAME}_SRCS qml.qrc)
-
-add_executable(${PROJECT_NAME} ${${PROJECT_NAME}_SRCS}
-    dbusconnector.cpp
-    main.cpp
-    mytreemodel.cpp
-    socketconnector.cpp
-    main.cpp
+add_executable(${PROJECT_NAME}
+    "qml.qrc"
+    "main.cpp"
+    "mytreemodel.cpp"
+    "dbusconnector.cpp"
+    "socketconnector.cpp"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME})

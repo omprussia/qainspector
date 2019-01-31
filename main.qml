@@ -1,8 +1,8 @@
-import QtQuick 2.7
+import QtQuick 2.12
 import QtQuick.Controls 1.4 as ControlsOld
 import QtQuick.Controls.Styles 1.4 as StylesOld
 import QtQuick.Layouts 1.3
-import QtQuick.Controls 2.1
+import QtQuick.Controls 2.2
 
 import ru.omprussia.qainspector 1.0
 
