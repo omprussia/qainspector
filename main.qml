@@ -172,9 +172,24 @@ ApplicationWindow {
             }
         }
 
+        Button {
+            text: "Dump cover"
+            visible: socket.checked && socketconnection.connected
+            onClicked: {
+                socketconnection.getDumpCover(function(dump) {
+                    myModel.loadDump(dump)
+                })
+                socketconnection.getGrabCover(function(ok) {
+                    screenImage.source = ""
+                    screenImage.source = myImage
+                })
+            }
+        }
+
         RadioButton {
             id: dbus
             text: "DBus"
+            visible: false
             onCheckedChanged: {
                 socketconnection.connected = false
                 busconnection.connected = false
@@ -185,6 +200,7 @@ ApplicationWindow {
             id: socket
             text: "Socket"
             checked: true
+            visible: false
             onCheckedChanged: {
                 socketconnection.connected = false
                 busconnection.connected = false
@@ -243,6 +259,13 @@ ApplicationWindow {
                 pointRect.visible = true
 
                 console.log(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
+
+
+                if (dbus.checked) {
+//                    busconnection.connected = !busconnection.connected
+                } else {
+                    socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
+                }
             }
         }
     }
