@@ -23,8 +23,12 @@ public:
 public slots:
     void getDumpPage(QJSValue callback);
     void getDumpTree(QJSValue callback);
+    void getDumpCover(QJSValue callback);
 
     void getGrabWindow(QJSValue callback);
+    void getGrabCover(QJSValue callback);
+
+    void findObject(int pointx, int pointy);
 
 signals:
     void connectedChanged(bool connected);
