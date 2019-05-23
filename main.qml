@@ -3,6 +3,7 @@ import QtQuick.Controls 1.4 as ControlsOld
 import QtQuick.Controls.Styles 1.4 as StylesOld
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.2
+import QtQml.Models 2.12
 
 import ru.omprussia.qainspector 1.0
 
@@ -58,18 +59,28 @@ ApplicationWindow {
         }
     }
 
-    DBusConnection {
-        id: busconnection
-        hostname: hostField.text
-        port: portField.text
-        applicationName: applicationField.text
-    }
-
     SocketConnection {
         id: socketconnection
         hostname: hostField.text
         port: portField.text
         applicationName: applicationField.text
+        onConnectedChanged: {
+            if (!socketconnection.connected) {
+                if (applicationField.changed) {
+                    reconnectTimer.start()
+                }
+            }
+        }
+    }
+
+    Timer {
+        id: reconnectTimer
+        interval: 2000
+        repeat: false
+        onTriggered: {
+            socketconnection.connected = true
+            applicationField.changed = false
+        }
     }
 
     Row {
@@ -81,13 +92,15 @@ ApplicationWindow {
             placeholderText: "192.168.2.15"
             text: placeholderText
             selectByMouse: true
+            width: 100
         }
 
         TextField {
             id: portField
-            placeholderText: dbus.checked ? "55556" : "8888"
+            placeholderText: "8888"
             text: placeholderText
             selectByMouse: true
+            width: 50
         }
 
         TextField {
@@ -95,58 +108,24 @@ ApplicationWindow {
             placeholderText: "jolla-settings"
             text: placeholderText
             selectByMouse: true
-        }
-
-        Button {
-            visible: dbus.checked
-            text: busconnection.connected ? "Disconnect" : "Connect"
-            onClicked: {
-                if (dbus.checked) {
-                    busconnection.connected = !busconnection.connected
-                } else {
-                    socketconnection.connected = !socketconnection.connected
+            property bool changed: false
+            onTextChanged: {
+                console.log(socketconnection.connected, changed)
+                if (socketconnection.connected) {
+                    changed = true
                 }
-
             }
         }
 
         Button {
-            text: "Dump tree"
-            visible: dbus.checked && busconnection.connected
-            onClicked: {
-                busconnection.getDumpTree(function(dump) {
-                    myModel.loadDump(dump)
-                })
-                busconnection.getGrabWindow(function(ok) {
-                    screenImage.source = ""
-                    screenImage.source = myImage
-                })
-            }
-        }
-
-        Button {
-            text: "Dump page"
-            visible: dbus.checked && busconnection.connected
-            onClicked: {
-                busconnection.getDumpPage(function(dump) {
-                    myModel.loadDump(dump)
-                })
-                busconnection.getGrabWindow(function(ok) {
-                    screenImage.source = ""
-                    screenImage.source = myImage
-                })
-            }
-        }
-
-        Button {
-            visible: socket.checked
-            text: socketconnection.connected ? "Disconnect" : "Connect"
+            enabled: !reconnectTimer.running
+            text: socketconnection.connected ? applicationField.changed ? "Reconnect" : "Disconnect" : "Connect"
             onClicked: socketconnection.connected = !socketconnection.connected
         }
 
         Button {
             text: "Dump tree"
-            visible: socket.checked && socketconnection.connected
+            visible: socketconnection.connected
             onClicked: {
                 socketconnection.getDumpTree(function(dump) {
                     myModel.loadDump(dump)
@@ -160,7 +139,7 @@ ApplicationWindow {
 
         Button {
             text: "Dump page"
-            visible: socket.checked && socketconnection.connected
+            visible: socketconnection.connected
             onClicked: {
                 socketconnection.getDumpPage(function(dump) {
                     myModel.loadDump(dump)
@@ -174,7 +153,7 @@ ApplicationWindow {
 
         Button {
             text: "Dump cover"
-            visible: socket.checked && socketconnection.connected
+            visible: socketconnection.connected
             onClicked: {
                 socketconnection.getDumpCover(function(dump) {
                     myModel.loadDump(dump)
@@ -186,24 +165,80 @@ ApplicationWindow {
             }
         }
 
-        RadioButton {
-            id: dbus
-            text: "DBus"
-            visible: false
-            onCheckedChanged: {
-                socketconnection.connected = false
-                busconnection.connected = false
+        Button {
+            text: "Expand all"
+            visible: socketconnection.connected
+            onClicked: {
+                myTreeView.expandAll()
+            }
+        }
+    }
+
+    Item {
+        id: searchRow
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: socketconnection.connected ? searchButton.height : 0
+
+        TextField {
+            id: searchField
+            placeholderText: ""
+            text: placeholderText
+            selectByMouse: true
+            width: 400
+        }
+
+        Row {
+            anchors.verticalCenter: searchButton.verticalCenter
+            anchors.right: searchButton.left
+
+            RadioButton {
+                id: classNameRadio
+                text: "ClassName"
+                onCheckedChanged: {
+                    if (checked) {
+                        searchButton.searchProperty = "classname"
+                    }
+                }
+            }
+
+            RadioButton {
+                id: textRadio
+                text: "Text"
+                checked: true
+                onCheckedChanged: {
+                    if (checked) {
+                        searchButton.searchProperty = "mainTextProperty"
+                    }
+                }
+            }
+
+            RadioButton {
+                id: valueRadio
+                text: "ObjectName"
+                onCheckedChanged: {
+                    if (checked) {
+                        searchButton.searchProperty = "objectName"
+                    }
+                }
             }
         }
 
-        RadioButton {
-            id: socket
-            text: "Socket"
-            checked: true
-            visible: false
-            onCheckedChanged: {
-                socketconnection.connected = false
-                busconnection.connected = false
+        Button {
+            id: searchButton
+            text: "Search"
+            visible: socketconnection.connected
+            anchors.right: parent.right
+            property string searchProperty: "mainTextProperty"
+            onClicked: {
+                myTreeView.forceActiveFocus()
+
+                var idx = myModel.searchIndex(searchProperty, searchField.text)
+                myTreeView.selection.setCurrentIndex(idx, ItemSelectionModel.ClearAndSelect)
+                myTreeView.searchIndex = true
+                searchAnimation.start()
+                screenBackground.selection = myModel.getRect(idx)
+
             }
         }
     }
@@ -260,12 +295,7 @@ ApplicationWindow {
 
                 console.log(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
 
-
-                if (dbus.checked) {
-//                    busconnection.connected = !busconnection.connected
-                } else {
-                    socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
-                }
+                socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
             }
         }
     }
@@ -279,7 +309,43 @@ ApplicationWindow {
         anchors.fill: parent
         anchors.topMargin: controlsRow.height
         anchors.leftMargin: screenBackground.width
+        anchors.bottomMargin: searchRow.height
         model: myModel
+
+        property bool searchIndex: false
+        property int selectedIndex: -1
+        onSelectedIndexChanged: {
+            console.log("###", selectedIndex, searchIndex)
+            if (searchIndex) {
+                searchIndex = false
+                searchAnimation.stop()
+                __listView.positionViewAtIndex(selectedIndex, ListView.Center)
+            }
+        }
+
+        Component.onCompleted: {
+            console.log(myTreeView)
+        }
+
+        NumberAnimation {
+            id: searchAnimation
+            target: myTreeView.__listView
+            property: "contentY"
+            from: 0
+            to: myTreeView.__listView.contentHeight - myTreeView.__listView.height - 24
+            duration: 1000
+        }
+
+        function expandAll() {
+            var someIndexes = myModel.getChildrenIndexes();
+            for (var i = 0; i < someIndexes.length; i++) {
+                myTreeView.expand(someIndexes[i]);
+            }
+        }
+
+        selection: ItemSelectionModel {
+            model: myModel
+        }
 
         style: StylesOld.TreeViewStyle {
             activateItemOnSingleClick: true
@@ -288,17 +354,45 @@ ApplicationWindow {
             textColor: "#000000"
         }
 
-        itemDelegate: Item {
-            Text {
-                anchors.verticalCenter: parent.verticalCenter
-                color: styleData.textColor
-                elide: styleData.elideMode
-                text: styleData.value
+        itemDelegate: Component {
+            Item {
+                id: itemDelegate
+                property bool itemSelected: styleData.selected
+                property int rowIndex: styleData.row
+                onRowIndexChanged: {
+                    if (myTreeView.searchIndex && styleData.selected && styleData.column == 0) {
+                        myTreeView.selectedIndex = styleData.row
+                    }
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: styleData.textColor
+                    elide: styleData.elideMode
+                    text: styleData.value
+                }
+            }
+        }
+
+        headerDelegate: Component {
+            Rectangle {
+                id: headerDelegate
+                height: 24
+                border.width: 1
+                border.color: "lightgray"
+                color: "white"
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: styleData.value
+                    x: 4
+                }
             }
         }
 
         onCurrentIndexChanged: {
+            console.log("onCurrentIndexChanged", currentIndex)
             screenBackground.selection = myModel.getRect(currentIndex)
+            console.log("onCurrentIndexChanged", screenBackground.selection)
         }
 
         onPressAndHold: {

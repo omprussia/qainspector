@@ -61,6 +61,11 @@ public slots:
     void fillModel(const QJsonObject &object);
     void loadDump(const QString &dump);
 
+    QVariantList getChildrenIndexes(TreeItem *node = nullptr);
+    QModelIndex searchIndex(const QString &key, const QVariant &value, TreeItem *node = nullptr);
+
+    void checkItemSelection(const QItemSelection &selection);
+
 private:
     QList<TreeItem*> processChilds(const QJsonArray &data, TreeItem *parentItem);
 

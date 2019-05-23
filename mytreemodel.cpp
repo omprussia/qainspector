@@ -242,6 +242,44 @@ void MyTreeModel::copyToClipboard(const QModelIndex &index)
     qGuiApp->clipboard()->setText(item->data("id").toString());
 }
 
+QVariantList MyTreeModel::getChildrenIndexes(TreeItem *node)
+{
+    QVariantList indexes;
+    TreeItem *parent = node ? node : m_rootItem;
+
+    for (int i = 0; i != parent->childCount(); ++i) {
+        TreeItem *child = parent->child(i);
+        indexes.push_back(createIndex(i, 0, reinterpret_cast<quintptr>(child)));
+
+        indexes.append(getChildrenIndexes(child));
+    }
+
+    return indexes;
+}
+
+QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, TreeItem *node)
+{
+    TreeItem *parent = node ? node : m_rootItem;
+
+    for (int i = 0; i != parent->childCount(); ++i) {
+        TreeItem *child = parent->child(i);
+        if (child->data(key) == value) {
+            return createIndex(i, 0, reinterpret_cast<quintptr>(child));
+        }
+
+        QModelIndex childIndex = searchIndex(key, value, child);
+        if (childIndex.internalPointer()) {
+            return childIndex;
+        }
+    }
+
+    return QModelIndex();
+}
+
+void MyTreeModel::checkItemSelection(const QItemSelection &selection)
+{
+    qDebug() << selection.indexes().first().row();
+}
 
 TreeItem::TreeItem(const QJsonObject &data, TreeItem *parent)
     : m_data(data)

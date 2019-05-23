@@ -14,7 +14,7 @@ set(CMAKE_BUILD_TYPE MinSizeRel)
 find_package(ECM 5.40.0 REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
 
-find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core DBus Quick QuickControls2 Network)
+find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core Quick QuickControls2 Network)
 
 include(KDEInstallDirs)
 include(KDECMakeSettings)
@@ -27,14 +27,13 @@ add_executable(${PROJECT_NAME}
     "qml.qrc"
     "main.cpp"
     "mytreemodel.cpp"
-    "dbusconnector.cpp"
     "socketconnector.cpp"
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES INSTALL_RPATH ${CMAKE_INSTALL_FULL_LIBDIR}/${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "ru.omprussia.qainspector")
 
-target_link_libraries(${PROJECT_NAME} LINK_PUBLIC Qt5::QuickControls2 Qt5::Network Qt5::Quick Qt5::DBus Qt5::Core)
+target_link_libraries(${PROJECT_NAME} LINK_PUBLIC Qt5::QuickControls2 Qt5::Network Qt5::Quick Qt5::Core)
 
 install(TARGETS ${PROJECT_NAME} ${INSTALL_TARGETS_DEFAULT_ARGS})
 install(FILES "ru.omprussia.qainspector.desktop" DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/applications")
