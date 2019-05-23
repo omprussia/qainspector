@@ -276,11 +276,6 @@ QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, 
     return QModelIndex();
 }
 
-void MyTreeModel::checkItemSelection(const QItemSelection &selection)
-{
-    qDebug() << selection.indexes().first().row();
-}
-
 TreeItem::TreeItem(const QJsonObject &data, TreeItem *parent)
     : m_data(data)
     , m_parent(parent)
