@@ -186,6 +186,13 @@ ApplicationWindow {
             text: placeholderText
             selectByMouse: true
             width: 400
+
+            Keys.onEnterPressed: {
+                searchButton.clicked()
+            }
+            Keys.onReturnPressed: {
+                searchButton.clicked()
+            }
         }
 
         Row {
@@ -234,9 +241,11 @@ ApplicationWindow {
                 myTreeView.forceActiveFocus()
 
                 var idx = myModel.searchIndex(searchProperty, searchField.text)
-                myTreeView.selection.setCurrentIndex(idx, ItemSelectionModel.ClearAndSelect)
                 myTreeView.searchIndex = true
-                searchAnimation.start()
+                myTreeView.selection.setCurrentIndex(idx, ItemSelectionModel.ClearAndSelect)
+                if (myTreeView.searchIndex) {
+                    searchAnimation.start()
+                }
                 screenBackground.selection = myModel.getRect(idx)
 
             }
@@ -358,6 +367,12 @@ ApplicationWindow {
             Item {
                 id: itemDelegate
                 property bool itemSelected: styleData.selected
+                onItemSelectedChanged: {
+                    if (myTreeView.searchIndex && itemSelected && styleData.column == 0 && styleData.row >= 0) {
+                        myTreeView.selectedIndex = styleData.row
+                    }
+                }
+
                 property int rowIndex: styleData.row
                 onRowIndexChanged: {
                     if (myTreeView.searchIndex && styleData.selected && styleData.column == 0) {
