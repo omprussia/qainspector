@@ -44,6 +44,14 @@ ApplicationWindow {
                             onWidthChanged: if (popupColumn.width < width) popupColumn.width = width
                             Label {
                                 text: modelData.name
+                                font.bold: nameArea.pressed
+                                MouseArea {
+                                    id: nameArea
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        myModel.copyText(modelData.name)
+                                    }
+                                }
                             }
                             Label {
                                 text: ":"
@@ -51,6 +59,14 @@ ApplicationWindow {
                             Label {
                                 Layout.fillWidth: true
                                 text: modelData.value
+                                font.bold: valueArea.pressed
+                                MouseArea {
+                                    id: valueArea
+                                    anchors.fill: parent
+                                    onClicked: {
+                                        myModel.copyText(modelData.value)
+                                    }
+                                }
                             }
                         }
                     }

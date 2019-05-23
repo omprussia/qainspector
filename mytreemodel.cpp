@@ -242,6 +242,11 @@ void MyTreeModel::copyToClipboard(const QModelIndex &index)
     qGuiApp->clipboard()->setText(item->data("id").toString());
 }
 
+void MyTreeModel::copyText(const QString &text)
+{
+    qGuiApp->clipboard()->setText(text);
+}
+
 QVariantList MyTreeModel::getChildrenIndexes(TreeItem *node)
 {
     QVariantList indexes;

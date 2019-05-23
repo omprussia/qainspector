@@ -57,6 +57,8 @@ public:
     Q_INVOKABLE QVariantList getDataList(const QModelIndex &index);
     Q_INVOKABLE void copyToClipboard(const QModelIndex &index);
 
+    Q_INVOKABLE void copyText(const QString &text);
+
 public slots:
     void fillModel(const QJsonObject &object);
     void loadDump(const QString &dump);
