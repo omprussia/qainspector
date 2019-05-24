@@ -325,7 +325,6 @@ ApplicationWindow {
 //                socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
                 var idx = myModel.searchByCoordinates(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
                 myTreeView.selectIndex(idx)
-                screenBackground.selection = myModel.getRect(idx)
             }
         }
     }
@@ -374,8 +373,13 @@ ApplicationWindow {
             target: myTreeView.__listView
             property: "contentY"
             from: 0
-            to: myTreeView.__listView.contentHeight - myTreeView.__listView.height - 48
+            to: Math.max(0, myTreeView.__listView.contentHeight - myTreeView.__listView.height - 24)
             duration: 1000
+            onStopped: {
+                if (myTreeView.selectedIndex == -1) {
+                    myTreeView.__listView.positionViewAtBeginning()
+                }
+            }
         }
 
         function expandAll() {
