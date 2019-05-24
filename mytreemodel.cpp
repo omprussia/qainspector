@@ -303,6 +303,18 @@ QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
+        const QVariant activeVariant = child->data("active");
+        const bool active = activeVariant.isValid() ? activeVariant.toBool() : true;
+
+        if (!active) {
+            continue;
+        }
+
+        const float opacity = child->data("opacity").toFloat();
+        if (opacity == 0.0f) {
+            continue;
+        }
+
         const QString classname = child->data("classname").toString();
         const bool visible = child->data("visible").toBool();
         const bool enabled = child->data("enabled").toBool();
@@ -315,6 +327,7 @@ QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
                 && classname != QLatin1String("QQuickLoader")
                 && classname != QLatin1String("DeclarativeTouchBlocker")
                 && classname != QLatin1String("QQuickItem")
+                && classname != QLatin1String("RotatingItem")
                 && posx >= itemx && posx <= (itemx + itemw)
                 && posy >= itemy && posy <= (itemy + itemh)) {
             childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));

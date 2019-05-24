@@ -130,9 +130,15 @@ ApplicationWindow {
                     changed = true
                 }
             }
+            Keys.onReturnPressed: {
+                if (!socketconnection.connected) {
+                    connectButton.clicked()
+                }
+            }
         }
 
         Button {
+            id: connectButton
             enabled: !reconnectTimer.running
             text: socketconnection.connected ? applicationField.changed ? "Reconnect" : "Disconnect" : "Connect"
             onClicked: socketconnection.connected = !socketconnection.connected
@@ -202,9 +208,6 @@ ApplicationWindow {
             selectByMouse: true
             width: 400
 
-            Keys.onEnterPressed: {
-                searchButton.clicked()
-            }
             Keys.onReturnPressed: {
                 searchButton.clicked()
             }
@@ -266,6 +269,21 @@ ApplicationWindow {
 
                 var idx = myModel.searchIndex(searchProperty, searchField.text, partialSwitch.checked, myTreeView.selection.currentIndex)
                 myTreeView.selectIndex(idx)
+            }
+        }
+    }
+
+    Row {
+        anchors.top: screenBackground.bottom
+
+        Button {
+            text: "Refresh"
+            visible: socketconnection.connected
+            onClicked: {
+                socketconnection.getGrabWindow(function(ok) {
+                    screenImage.source = ""
+                    screenImage.source = myImage
+                })
             }
         }
     }
@@ -353,6 +371,7 @@ ApplicationWindow {
 
         function selectIndex(idx) {
             myTreeView.forceActiveFocus()
+            myTreeView.expandAll()
             myTreeView.selectedIndex = -1
             myTreeView.searchIndex = true
             myTreeView.selection.clearCurrentIndex()
@@ -374,7 +393,7 @@ ApplicationWindow {
             property: "contentY"
             from: 0
             to: Math.max(0, myTreeView.__listView.contentHeight - myTreeView.__listView.height - 24)
-            duration: 1000
+            duration: myTreeView.__listView.contentHeight / 5
             onStopped: {
                 if (myTreeView.selectedIndex == -1) {
                     myTreeView.__listView.positionViewAtBeginning()
