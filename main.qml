@@ -254,16 +254,17 @@ ApplicationWindow {
             anchors.right: parent.right
             property string searchProperty: "mainTextProperty"
             onClicked: {
-                myTreeView.forceActiveFocus()
-
-                var idx = myModel.searchIndex(searchProperty, searchField.text)
-                myTreeView.searchIndex = true
-                myTreeView.selection.setCurrentIndex(idx, ItemSelectionModel.ClearAndSelect)
-                if (myTreeView.searchIndex) {
-                    searchAnimation.start()
+                if (searchField.text == "") {
+                    searchField.forceActiveFocus()
+                    return
                 }
-                screenBackground.selection = myModel.getRect(idx)
 
+                if (myTreeView.selection.currentIndex.row >= 0) {
+                    var idx = myModel.searchIndex(searchProperty, searchField.text, myTreeView.selection.currentIndex)
+                }
+
+                var idx = myModel.searchIndex(searchProperty, searchField.text, myTreeView.selection.currentIndex)
+                myTreeView.selectIndex(idx)
             }
         }
     }
@@ -320,7 +321,10 @@ ApplicationWindow {
 
                 console.log(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
 
-                socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
+//                socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
+                var idx = myModel.searchByCoordinates(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
+                myTreeView.selectIndex(idx)
+                screenBackground.selection = myModel.getRect(idx)
             }
         }
     }
@@ -340,12 +344,24 @@ ApplicationWindow {
         property bool searchIndex: false
         property int selectedIndex: -1
         onSelectedIndexChanged: {
-            console.log("###", selectedIndex, searchIndex)
             if (searchIndex) {
                 searchIndex = false
                 searchAnimation.stop()
                 __listView.positionViewAtIndex(selectedIndex, ListView.Center)
             }
+        }
+
+        function selectIndex(idx) {
+            myTreeView.forceActiveFocus()
+            myTreeView.selectedIndex = -1
+            myTreeView.searchIndex = true
+            myTreeView.selection.clearCurrentIndex()
+            myTreeView.__listView.positionViewAtBeginning()
+            myTreeView.selection.setCurrentIndex(idx, ItemSelectionModel.ClearAndSelect)
+            if (myTreeView.searchIndex) {
+                searchAnimation.start()
+            }
+            screenBackground.selection = myModel.getRect(idx)
         }
 
         Component.onCompleted: {
@@ -357,7 +373,7 @@ ApplicationWindow {
             target: myTreeView.__listView
             property: "contentY"
             from: 0
-            to: myTreeView.__listView.contentHeight - myTreeView.__listView.height - 24
+            to: myTreeView.__listView.contentHeight - myTreeView.__listView.height - 48
             duration: 1000
         }
 

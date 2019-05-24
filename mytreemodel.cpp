@@ -262,23 +262,64 @@ QVariantList MyTreeModel::getChildrenIndexes(TreeItem *node)
     return indexes;
 }
 
-QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, TreeItem *node)
+QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, const QModelIndex &currentIndex, TreeItem *node)
 {
+    static bool currentFound = false;
+    if (!node) {
+        currentFound = false;
+    }
+    if (!currentIndex.isValid()) {
+        currentFound = true;
+    }
     TreeItem *parent = node ? node : m_rootItem;
 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
         if (child->data(key) == value) {
-            return createIndex(i, 0, reinterpret_cast<quintptr>(child));
+            const QModelIndex newIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
+            if (currentFound) {
+                return newIndex;
+            }
+            if (newIndex == currentIndex) {
+                currentFound = true;
+            }
         }
 
-        QModelIndex childIndex = searchIndex(key, value, child);
+        QModelIndex childIndex = searchIndex(key, value, currentIndex, child);
         if (childIndex.internalPointer()) {
             return childIndex;
         }
     }
 
     return QModelIndex();
+}
+
+QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
+{
+//    qDebug() << Q_FUNC_INFO << posx << posy;
+    TreeItem *parent = node ? node : m_rootItem;
+    QModelIndex childIndex;
+
+    for (int i = 0; i != parent->childCount(); ++i) {
+        TreeItem *child = parent->child(i);
+        const int itemx = child->data("abs_x").toInt();
+        const int itemy = child->data("abs_y").toInt();
+        const int itemw = child->data("width").toInt();
+        const int itemh = child->data("height").toInt();
+        const int itemz = child->data("z").toInt();
+
+        if (posx >= itemx && posx <= (itemx + itemw) && posy >= itemy && posy <= (itemy + itemh)) {
+            qDebug() << Q_FUNC_INFO << child->data("id").toString() << itemz << itemx << itemy << itemw << itemh;
+            childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
+        }
+
+        QModelIndex someIndex = searchByCoordinates(posx, posy, child);
+        if (someIndex.isValid()) {
+            childIndex = someIndex;
+        }
+    }
+
+    return childIndex;
 }
 
 TreeItem::TreeItem(const QJsonObject &data, TreeItem *parent)

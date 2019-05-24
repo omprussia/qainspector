@@ -64,7 +64,8 @@ public slots:
     void loadDump(const QString &dump);
 
     QVariantList getChildrenIndexes(TreeItem *node = nullptr);
-    QModelIndex searchIndex(const QString &key, const QVariant &value, TreeItem *node = nullptr);
+    QModelIndex searchIndex(const QString &key, const QVariant &value, const QModelIndex &currentIndex, TreeItem *node = nullptr);
+    QModelIndex searchByCoordinates(int posx, int posy, TreeItem *node = nullptr);
 
 private:
     QList<TreeItem*> processChilds(const QJsonArray &data, TreeItem *parentItem);
