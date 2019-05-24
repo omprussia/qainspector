@@ -262,7 +262,7 @@ QVariantList MyTreeModel::getChildrenIndexes(TreeItem *node)
     return indexes;
 }
 
-QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, const QModelIndex &currentIndex, TreeItem *node)
+QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, bool partialSearch, const QModelIndex &currentIndex, TreeItem *node)
 {
     static bool currentFound = false;
     if (!node) {
@@ -275,7 +275,8 @@ QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, 
 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
-        if (child->data(key) == value) {
+        if (child->data(key) == value
+                || (partialSearch && value.type() == QVariant::String && child->data(key).toString().contains(value.toString()))) {
             const QModelIndex newIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
             if (currentFound) {
                 return newIndex;
@@ -285,7 +286,7 @@ QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, 
             }
         }
 
-        QModelIndex childIndex = searchIndex(key, value, currentIndex, child);
+        QModelIndex childIndex = searchIndex(key, value, partialSearch, currentIndex, child);
         if (childIndex.internalPointer()) {
             return childIndex;
         }
@@ -302,14 +303,20 @@ QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
+        const QString classname = child->data("classname").toString();
+        const bool visible = child->data("visible").toBool();
+        const bool enabled = child->data("enabled").toBool();
         const int itemx = child->data("abs_x").toInt();
         const int itemy = child->data("abs_y").toInt();
         const int itemw = child->data("width").toInt();
         const int itemh = child->data("height").toInt();
-        const int itemz = child->data("z").toInt();
 
-        if (posx >= itemx && posx <= (itemx + itemw) && posy >= itemy && posy <= (itemy + itemh)) {
-            qDebug() << Q_FUNC_INFO << child->data("id").toString() << itemz << itemx << itemy << itemw << itemh;
+        if (visible && enabled
+                && classname != QLatin1String("QQuickLoader")
+                && classname != QLatin1String("DeclarativeTouchBlocker")
+                && classname != QLatin1String("QQuickItem")
+                && posx >= itemx && posx <= (itemx + itemw)
+                && posy >= itemy && posy <= (itemy + itemh)) {
             childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
         }
 

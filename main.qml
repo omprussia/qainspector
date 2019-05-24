@@ -126,7 +126,6 @@ ApplicationWindow {
             selectByMouse: true
             property bool changed: false
             onTextChanged: {
-                console.log(socketconnection.connected, changed)
                 if (socketconnection.connected) {
                     changed = true
                 }
@@ -215,6 +214,12 @@ ApplicationWindow {
             anchors.verticalCenter: searchButton.verticalCenter
             anchors.right: searchButton.left
 
+            Switch {
+                id: partialSwitch
+                text: "Partial"
+                checked: true
+            }
+
             RadioButton {
                 id: classNameRadio
                 text: "ClassName"
@@ -259,11 +264,7 @@ ApplicationWindow {
                     return
                 }
 
-                if (myTreeView.selection.currentIndex.row >= 0) {
-                    var idx = myModel.searchIndex(searchProperty, searchField.text, myTreeView.selection.currentIndex)
-                }
-
-                var idx = myModel.searchIndex(searchProperty, searchField.text, myTreeView.selection.currentIndex)
+                var idx = myModel.searchIndex(searchProperty, searchField.text, partialSwitch.checked, myTreeView.selection.currentIndex)
                 myTreeView.selectIndex(idx)
             }
         }
