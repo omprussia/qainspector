@@ -21,10 +21,10 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
 
-    QFileInfo png("dump.png");
-    engine.rootContext()->setContextProperty("myImage", QUrl::fromLocalFile(png.absoluteFilePath()));
+    QFileInfo png(QStringLiteral("dump.png"));
+    engine.rootContext()->setContextProperty(QStringLiteral("myImage"), QUrl::fromLocalFile(png.absoluteFilePath()));
 
-    engine.load(QUrl(QLatin1String("qrc:/main.qml")));
+    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty())
         return -1;
 

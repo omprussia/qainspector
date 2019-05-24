@@ -206,10 +206,10 @@ QRect MyTreeModel::getRect(const QModelIndex &index)
     }
 
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
-    rect.setX(item->data("abs_x").toInt());
-    rect.setY(item->data("abs_y").toInt());
-    rect.setWidth(item->data("width").toInt());
-    rect.setHeight(item->data("height").toInt());
+    rect.setX(item->data(QStringLiteral("abs_x")).toInt());
+    rect.setY(item->data(QStringLiteral("abs_y")).toInt());
+    rect.setWidth(item->data(QStringLiteral("width")).toInt());
+    rect.setHeight(item->data(QStringLiteral("height")).toInt());
 
     return rect;
 }
@@ -225,7 +225,8 @@ QVariantList MyTreeModel::getDataList(const QModelIndex &index)
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
     const QJsonObject jsonData = item->data();
     for (const QString &key : jsonData.keys()) {
-        dataList.append(QVariantMap({{"name", key}, {"value", jsonData.value(key).toVariant()}}));
+        dataList.append(QVariantMap({{QStringLiteral("name"), key},
+                                     {QStringLiteral("value"), jsonData.value(key).toVariant()}}));
     }
 
     return dataList;
@@ -239,7 +240,7 @@ void MyTreeModel::copyToClipboard(const QModelIndex &index)
 
     TreeItem *item = static_cast<TreeItem*>(index.internalPointer());
 
-    qGuiApp->clipboard()->setText(item->data("id").toString());
+    qGuiApp->clipboard()->setText(item->data(QStringLiteral("id")).toString());
 }
 
 void MyTreeModel::copyText(const QString &text)
@@ -303,28 +304,34 @@ QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
-        const QVariant activeVariant = child->data("active");
+        const QVariant activeVariant = child->data(QStringLiteral("active"));
         const bool active = activeVariant.isValid() ? activeVariant.toBool() : true;
-
         if (!active) {
             continue;
         }
 
-        const float opacity = child->data("opacity").toFloat();
+        const bool visible = child->data(QStringLiteral("visible")).toBool();
+        if (!visible) {
+            continue;
+        }
+
+        const bool enabled = child->data(QStringLiteral("enabled")).toBool();
+        if (!enabled) {
+            continue;
+        }
+
+        const float opacity = child->data(QStringLiteral("opacity")).toFloat();
         if (opacity == 0.0f) {
             continue;
         }
 
-        const QString classname = child->data("classname").toString();
-        const bool visible = child->data("visible").toBool();
-        const bool enabled = child->data("enabled").toBool();
-        const int itemx = child->data("abs_x").toInt();
-        const int itemy = child->data("abs_y").toInt();
-        const int itemw = child->data("width").toInt();
-        const int itemh = child->data("height").toInt();
+        const QString classname = child->data(QStringLiteral("classname")).toString();
+        const int itemx = child->data(QStringLiteral("abs_x")).toInt();
+        const int itemy = child->data(QStringLiteral("abs_y")).toInt();
+        const int itemw = child->data(QStringLiteral("width")).toInt();
+        const int itemh = child->data(QStringLiteral("height")).toInt();
 
-        if (visible && enabled
-                && classname != QLatin1String("QQuickLoader")
+        if (classname != QLatin1String("QQuickLoader")
                 && classname != QLatin1String("DeclarativeTouchBlocker")
                 && classname != QLatin1String("QQuickItem")
                 && classname != QLatin1String("RotatingItem")

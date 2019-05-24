@@ -16,7 +16,7 @@ SocketConnector::SocketConnector(QObject *parent)
         const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
         m_socket->write(data);
-        m_socket->write(QByteArrayLiteral("\n"));
+        m_socket->write("\n", 1);
         m_socket->waitForBytesWritten();
 
         m_socket->waitForReadyRead(500);
@@ -61,7 +61,7 @@ void SocketConnector::getDumpPage(QJSValue callback)
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
-    m_socket->write(QByteArrayLiteral("\n"));
+    m_socket->write("\n", 1);
     m_socket->waitForBytesWritten();
 
     QByteArray replyData;
@@ -98,7 +98,7 @@ void SocketConnector::getDumpTree(QJSValue callback)
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
-    m_socket->write(QByteArrayLiteral("\n"));
+    m_socket->write("\n", 1);
     m_socket->waitForBytesWritten();
 
     QByteArray replyData;
@@ -134,7 +134,7 @@ void SocketConnector::getDumpCover(QJSValue callback)
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
-    m_socket->write(QByteArrayLiteral("\n"));
+    m_socket->write("\n", 1);
     m_socket->waitForBytesWritten();
 
     QByteArray replyData;
@@ -170,7 +170,7 @@ void SocketConnector::getGrabWindow(QJSValue callback)
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
-    m_socket->write(QByteArrayLiteral("\n"));
+    m_socket->write("\n", 1);
     m_socket->waitForBytesWritten();
 
     QByteArray replyData;
@@ -192,7 +192,7 @@ void SocketConnector::getGrabWindow(QJSValue callback)
     QJsonObject replyObject = replyDoc.object();
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
 
-        QFile file("dump.png");
+        QFile file(QStringLiteral("dump.png"));
         if (file.open(QFile::WriteOnly)) {
             const QByteArray data = QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toUtf8());
             qDebug() << Q_FUNC_INFO << file.write(data);
@@ -214,7 +214,7 @@ void SocketConnector::getGrabCover(QJSValue callback)
     const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
 
     m_socket->write(data);
-    m_socket->write(QByteArrayLiteral("\n"));
+    m_socket->write("\n", 1);
     m_socket->waitForBytesWritten();
 
     QByteArray replyData;
@@ -235,8 +235,7 @@ void SocketConnector::getGrabCover(QJSValue callback)
 
     QJsonObject replyObject = replyDoc.object();
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
-
-        QFile file("dump.png");
+        QFile file(QStringLiteral("dump.png"));
         if (file.open(QFile::WriteOnly)) {
             const QByteArray data = QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toUtf8());
             qDebug() << Q_FUNC_INFO << file.write(data);
@@ -246,45 +245,5 @@ void SocketConnector::getGrabCover(QJSValue callback)
         if (callback.isCallable()) {
             callback.call({ QJSValue(!data.isEmpty()) });
         }
-    }
-}
-
-void SocketConnector::findObject(int pointx, int pointy)
-{
-    qDebug() << Q_FUNC_INFO << pointx << pointy;
-    if (!isConnected()) {
-        return;
-    }
-
-    QJsonObject json;
-    json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
-    json.insert(QStringLiteral("action"), QJsonValue(QStringLiteral("findElement")));
-    json.insert(QStringLiteral("params"), QJsonValue::fromVariant(QVariant::fromValue(QStringList({QStringLiteral("-custom"),
-                                                                                                   QStringLiteral("coordinates:%1,%2").arg(pointx).arg(pointy)}))));
-    const QByteArray data = QJsonDocument(json).toJson(QJsonDocument::Compact);
-
-    m_socket->write(data);
-    m_socket->write(QByteArrayLiteral("\n"));
-    m_socket->waitForBytesWritten();
-
-    QByteArray replyData;
-    QJsonDocument replyDoc;
-    QJsonParseError error;
-    error.error = QJsonParseError::UnterminatedObject;
-
-    replyDoc = QJsonDocument::fromJson(replyData, &error);
-
-    while (error.error != QJsonParseError::NoError) {
-        if (!m_socket->waitForReadyRead(10000)) {
-            qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
-            return;
-        }
-        replyData.append(m_socket->readAll());
-        replyDoc = QJsonDocument::fromJson(replyData, &error);
-    }
-
-    QJsonObject replyObject = replyDoc.object();
-    if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
-         qDebug() << Q_FUNC_INFO << replyObject.value(QStringLiteral("value")).toString();
     }
 }

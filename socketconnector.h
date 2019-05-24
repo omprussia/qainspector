@@ -28,8 +28,6 @@ public slots:
     void getGrabWindow(QJSValue callback);
     void getGrabCover(QJSValue callback);
 
-    void findObject(int pointx, int pointy);
-
 signals:
     void connectedChanged(bool connected);
     void hostnameChanged();
