@@ -131,7 +131,7 @@ ApplicationWindow {
                 }
             }
             Keys.onReturnPressed: {
-                if (!socketconnection.connected) {
+                if (!socketconnection.connected || applicationField.changed) {
                     connectButton.clicked()
                 }
             }
@@ -338,8 +338,6 @@ ApplicationWindow {
                 pointRect.posy = mouse.y
                 pointRect.visible = true
 
-                console.log(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
-
 //                socketconnection.findObject(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
                 var idx = myModel.searchByCoordinates(mouse.x / screenBackground.factor, mouse.y / screenBackground.factor)
                 myTreeView.selectIndex(idx)
@@ -362,10 +360,10 @@ ApplicationWindow {
         property bool searchIndex: false
         property int selectedIndex: -1
         onSelectedIndexChanged: {
-            if (searchIndex) {
+            if (searchIndex >= 0) {
                 searchIndex = false
                 searchAnimation.stop()
-                __listView.positionViewAtIndex(selectedIndex, ListView.Center)
+                __listView.positionViewAtIndex(selectedIndex, ListView.Contain)
             }
         }
 
@@ -381,10 +379,6 @@ ApplicationWindow {
                 searchAnimation.start()
             }
             screenBackground.selection = myModel.getRect(idx)
-        }
-
-        Component.onCompleted: {
-            console.log(myTreeView)
         }
 
         NumberAnimation {
@@ -417,6 +411,14 @@ ApplicationWindow {
             backgroundColor: "#20aaaaaa"
             alternateBackgroundColor: "#40aaaaaa"
             textColor: "#000000"
+        }
+
+
+        __itemDelegateLoader: DelegateLoader {
+            __style: myTreeView.__style
+            __itemDelegate: myTreeView.itemDelegate
+            __mouseArea: myTreeView.__mouseArea
+            __treeModel: myTreeView.__model
         }
 
         itemDelegate: Component {
@@ -461,9 +463,7 @@ ApplicationWindow {
         }
 
         onCurrentIndexChanged: {
-            console.log("onCurrentIndexChanged", currentIndex)
             screenBackground.selection = myModel.getRect(currentIndex)
-            console.log("onCurrentIndexChanged", screenBackground.selection)
         }
 
         onPressAndHold: {
