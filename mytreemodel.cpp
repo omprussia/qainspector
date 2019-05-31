@@ -335,6 +335,7 @@ QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
                 && classname != QLatin1String("DeclarativeTouchBlocker")
                 && classname != QLatin1String("QQuickItem")
                 && classname != QLatin1String("RotatingItem")
+                && classname != QLatin1String("QQuickShaderEffect")
                 && posx >= itemx && posx <= (itemx + itemw)
                 && posy >= itemy && posy <= (itemy + itemh)) {
             childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
