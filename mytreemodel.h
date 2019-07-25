@@ -35,6 +35,7 @@ private:
 
 };
 
+class QXmlStreamWriter;
 class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -69,6 +70,8 @@ public slots:
 
 private:
     QList<TreeItem*> processChilds(const QJsonArray &data, TreeItem *parentItem);
+    QString searchXPath(const QString &xpath, const QString &currentId = QString());
+    void recursiveDumpXml(QXmlStreamWriter *writer, TreeItem *parent);
 
     QStringList m_roleNames;
     QHash<int, QByteArray> m_roles;

@@ -6,6 +6,8 @@
 
 #include <QGuiApplication>
 #include <QClipboard>
+#include <QXmlStreamWriter>
+#include <QXmlQuery>
 
 MyTreeModel::MyTreeModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -76,6 +78,78 @@ QList<TreeItem *> MyTreeModel::processChilds(const QJsonArray &data, TreeItem *p
         childs.append(child);
     }
     return childs;
+}
+
+QString MyTreeModel::searchXPath(const QString &xpath, const QString &currentId)
+{
+    QString out;
+    QXmlStreamWriter writer(&out);
+    writer.setAutoFormatting(true);
+    writer.writeStartDocument();
+    recursiveDumpXml(&writer, m_rootItem->child(0));
+    writer.writeEndDocument();
+
+    qDebug().noquote() << out;
+
+    QXmlQuery query;
+    query.setFocus(out);
+    query.setQuery(xpath);
+
+    if (!query.isValid()) {
+        return QString();
+    }
+    QString tempString;
+    query.evaluateTo(&tempString);
+
+    if (tempString.trimmed().isEmpty()) {
+        return QString();
+    }
+
+    const QString resultData = QLatin1String("<results>") + tempString + QLatin1String("</results>");
+    QXmlStreamReader reader(resultData);
+    reader.readNextStartElement();
+    QStringList items;
+    while (!reader.atEnd()) {
+        reader.readNext();
+        if (reader.isStartElement()) {
+            items.append(reader.attributes().value(QStringLiteral("id")).toString());
+        }
+    }
+    if (items.isEmpty()) {
+        return QString();
+    }
+    if (currentId.isEmpty()) {
+        return items.first();
+    }
+    const int currentIndex = items.indexOf(currentId);
+    if (currentIndex == -1) {
+        return items.first();
+    }
+    if (currentIndex == items.size() - 1) {
+        return items.first();
+    }
+
+    return items.at(currentIndex + 1);
+}
+
+void MyTreeModel::recursiveDumpXml(QXmlStreamWriter *writer, TreeItem *parent)
+{
+    const QJsonObject object = parent->data();
+    writer->writeStartElement(object.value(QStringLiteral("classname")).toString());
+    for (auto i = object.constBegin(), objEnd = object.constEnd(); i != objEnd; ++i) {
+        const QJsonValue& val = *i;
+        const QString &name = i.key();
+
+        writer->writeAttribute(name, val.toVariant().toString());
+    }
+    if (object.contains(QStringLiteral("mainTextProperty"))) {
+        writer->writeCharacters(object.value(QStringLiteral("mainTextProperty")).toString());
+    }
+    for (int i = 0; i != parent->childCount(); ++i) {
+        TreeItem *child = parent->child(i);
+        recursiveDumpXml(writer, child);
+    }
+    writer->writeEndElement();
 }
 
 QMap<int, QVariant> MyTreeModel::itemData(const QModelIndex &index) const
@@ -265,6 +339,20 @@ QVariantList MyTreeModel::getChildrenIndexes(TreeItem *node)
 
 QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, bool partialSearch, const QModelIndex &currentIndex, TreeItem *node)
 {
+    if (key == QLatin1String("xpath")) {
+        QString currentId;
+        if (currentIndex.internalPointer()) {
+            TreeItem *item = static_cast<TreeItem*>(currentIndex.internalPointer());
+            currentId = item->data(QStringLiteral("id")).toString();
+        }
+
+        const QString itemId = searchXPath(value.toString(), currentId);
+        if (itemId.isEmpty()) {
+            return QModelIndex();
+        }
+        return searchIndex(QStringLiteral("id"), itemId, false, currentIndex, node);
+    }
+
     static bool currentFound = false;
     if (!node) {
         currentFound = false;
@@ -274,26 +362,34 @@ QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, 
     }
     TreeItem *parent = node ? node : m_rootItem;
 
+    QModelIndex index;
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
+        const QModelIndex newIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
+        if (newIndex == currentIndex) {
+            currentFound = true;
+            continue;
+        }
         if (child->data(key) == value
                 || (partialSearch && value.type() == QVariant::String && child->data(key).toString().contains(value.toString()))) {
-            const QModelIndex newIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
             if (currentFound) {
-                return newIndex;
-            }
-            if (newIndex == currentIndex) {
-                currentFound = true;
+                index = newIndex;
+                break;
             }
         }
 
         QModelIndex childIndex = searchIndex(key, value, partialSearch, currentIndex, child);
         if (childIndex.internalPointer()) {
-            return childIndex;
+            index = childIndex;
+            break;
         }
     }
 
-    return QModelIndex();
+    if (!node && currentIndex.isValid() && !index.isValid()) {
+        return searchIndex(key, value, partialSearch, currentIndex, m_rootItem->child(0));
+    }
+
+    return index;
 }
 
 QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
@@ -336,6 +432,8 @@ QModelIndex MyTreeModel::searchByCoordinates(int posx, int posy, TreeItem *node)
                 && classname != QLatin1String("QQuickItem")
                 && classname != QLatin1String("RotatingItem")
                 && classname != QLatin1String("QQuickShaderEffect")
+                && classname != QLatin1String("QQuickShaderEffectSource")
+                && !classname.endsWith(QLatin1String("Gradient"))
                 && posx >= itemx && posx <= (itemx + itemw)
                 && posy >= itemy && posy <= (itemy + itemh)) {
             childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
@@ -394,6 +492,9 @@ void TreeItem::genocide()
 
 QVariant TreeItem::data(const QString &roleName) const
 {
+    if (!m_data.contains(roleName)) {
+        return QVariant();
+    }
     return m_data.value(roleName).toVariant();
 }
 

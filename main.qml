@@ -206,7 +206,8 @@ ApplicationWindow {
             placeholderText: ""
             text: placeholderText
             selectByMouse: true
-            width: 400
+            anchors.left: parent.left
+            anchors.right: searchSwitchRow.left
 
             Keys.onReturnPressed: {
                 searchButton.clicked()
@@ -214,6 +215,7 @@ ApplicationWindow {
         }
 
         Row {
+            id: searchSwitchRow
             anchors.verticalCenter: searchButton.verticalCenter
             anchors.right: searchButton.left
 
@@ -221,6 +223,7 @@ ApplicationWindow {
                 id: partialSwitch
                 text: "Partial"
                 checked: true
+                enabled: !xpathRadio.checked
             }
 
             RadioButton {
@@ -250,6 +253,16 @@ ApplicationWindow {
                 onCheckedChanged: {
                     if (checked) {
                         searchButton.searchProperty = "objectName"
+                    }
+                }
+            }
+
+            RadioButton {
+                id: xpathRadio
+                text: "XPath"
+                onCheckedChanged: {
+                    if (checked) {
+                        searchButton.searchProperty = "xpath"
                     }
                 }
             }
