@@ -366,12 +366,12 @@ QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem *child = parent->child(i);
         const QModelIndex newIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
-        if (newIndex == currentIndex) {
+        const bool match = child->data(key) == value
+                || (partialSearch && value.type() == QVariant::String && child->data(key).toString().contains(value.toString()));
+        if (!currentFound && newIndex == currentIndex) {
             currentFound = true;
-            continue;
         }
-        if (child->data(key) == value
-                || (partialSearch && value.type() == QVariant::String && child->data(key).toString().contains(value.toString()))) {
+        if (newIndex != currentIndex && match) {
             if (currentFound) {
                 index = newIndex;
                 break;
