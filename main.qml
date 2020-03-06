@@ -154,6 +154,7 @@ ApplicationWindow {
                 socketconnection.getGrabWindow(function(ok) {
                     screenImage.source = ""
                     screenImage.source = myImage
+                    screenImage.sourceChanged()
                 })
             }
         }

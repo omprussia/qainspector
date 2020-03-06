@@ -91,7 +91,7 @@ QString MyTreeModel::searchXPath(const QString &xpath, const QString &currentId)
 
     qDebug().noquote() << out;
 
-    QXmlQuery query;
+    QXmlQuery query(QXmlQuery::XPath20);
     query.setFocus(out);
     query.setQuery(xpath);
 
@@ -386,7 +386,7 @@ QModelIndex MyTreeModel::searchIndex(const QString &key, const QVariant &value, 
     }
 
     if (!node && currentIndex.isValid() && !index.isValid()) {
-        return searchIndex(key, value, partialSearch, currentIndex, m_rootItem->child(0));
+        index = searchIndex(key, value, partialSearch, currentIndex, m_rootItem->child(0));
     }
 
     return index;

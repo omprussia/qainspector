@@ -75,6 +75,7 @@ private:
 
     QStringList m_roleNames;
     QHash<int, QByteArray> m_roles;
+    QHash<TreeItem*, QModelIndex> m_indexes;
 
     TreeItem *m_rootItem = nullptr;
 };

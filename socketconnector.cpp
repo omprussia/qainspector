@@ -70,8 +70,9 @@ void SocketConnector::getDumpPage(QJSValue callback)
     error.error = QJsonParseError::UnterminatedObject;
 
     while (error.error != QJsonParseError::NoError) {
-        if (!m_socket->waitForReadyRead(10000)) {
+        if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
+            qDebug().noquote() << replyData;
             return;
         }
         const QString readData = m_socket->readLine();
@@ -109,8 +110,9 @@ void SocketConnector::getDumpTree(QJSValue callback)
     replyDoc = QJsonDocument::fromJson(replyData, &error);
 
     while (error.error != QJsonParseError::NoError) {
-        if (!m_socket->waitForReadyRead(10000)) {
+        if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
+            qDebug().noquote() << replyData;
             return;
         }
         replyData.append(m_socket->readAll());
@@ -120,7 +122,8 @@ void SocketConnector::getDumpTree(QJSValue callback)
     QJsonObject replyObject = replyDoc.object();
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
         if (callback.isCallable()) {
-            callback.call({ QJSValue(replyObject.value(QStringLiteral("value")).toString()) });
+            QByteArray data = qUncompress(QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toLatin1()));
+            callback.call({ QJSValue(QString::fromUtf8(data)) });
         }
     }
 }
@@ -145,8 +148,9 @@ void SocketConnector::getDumpCover(QJSValue callback)
     replyDoc = QJsonDocument::fromJson(replyData, &error);
 
     while (error.error != QJsonParseError::NoError) {
-        if (!m_socket->waitForReadyRead(10000)) {
+        if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
+            qDebug().noquote() << replyData;
             return;
         }
         replyData.append(m_socket->readAll());
@@ -181,8 +185,9 @@ void SocketConnector::getGrabWindow(QJSValue callback)
     replyDoc = QJsonDocument::fromJson(replyData, &error);
 
     while (error.error != QJsonParseError::NoError) {
-        if (!m_socket->waitForReadyRead(10000)) {
+        if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
+            qDebug().noquote() << replyData;
             return;
         }
         replyData.append(m_socket->readAll());
@@ -225,8 +230,9 @@ void SocketConnector::getGrabCover(QJSValue callback)
     replyDoc = QJsonDocument::fromJson(replyData, &error);
 
     while (error.error != QJsonParseError::NoError) {
-        if (!m_socket->waitForReadyRead(10000)) {
+        if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
+            qDebug().noquote() << replyData;
             return;
         }
         replyData.append(m_socket->readAll());
