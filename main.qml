@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.4 as StylesOld
 import QtQuick.Layouts 1.3
 import QtQuick.Controls 2.2
 import QtQml.Models 2.12
+import Qt.labs.settings 1.0
 
 import ru.omprussia.qainspector 1.0
 
@@ -13,6 +14,13 @@ ApplicationWindow {
     width: 640
     height: 480
     title: qsTr("QA Inspector")
+
+    Settings {
+        id: settings
+        property string host: hostField.placeholderText
+        property string port: portField.placeholderText
+        property string application: applicationField.placeholderText
+    }
 
     Component {
         id: popupComponent
@@ -106,7 +114,8 @@ ApplicationWindow {
         TextField {
             id: hostField
             placeholderText: "192.168.2.15"
-            text: placeholderText
+            text: settings.host
+            onTextChanged: settings.host = text
             selectByMouse: true
             width: 100
         }
@@ -114,7 +123,8 @@ ApplicationWindow {
         TextField {
             id: portField
             placeholderText: "8888"
-            text: placeholderText
+            text: settings.port
+            onTextChanged: settings.port = text
             selectByMouse: true
             width: 50
         }
@@ -122,10 +132,11 @@ ApplicationWindow {
         TextField {
             id: applicationField
             placeholderText: "jolla-settings"
-            text: placeholderText
+            text: settings.application
             selectByMouse: true
             property bool changed: false
             onTextChanged: {
+                settings.application = text
                 if (socketconnection.connected) {
                     changed = true
                 }
@@ -142,6 +153,14 @@ ApplicationWindow {
             enabled: !reconnectTimer.running
             text: socketconnection.connected ? applicationField.changed ? "Reconnect" : "Disconnect" : "Connect"
             onClicked: socketconnection.connected = !socketconnection.connected
+        }
+
+        Button {
+            text: "Dump dumb"
+            visible: !socketconnection.connected
+            onClicked: {
+                myModel.loadDumb()
+            }
         }
 
         Button {
@@ -189,7 +208,7 @@ ApplicationWindow {
 
         Button {
             text: "Expand all"
-            visible: socketconnection.connected
+            visible: myTreeView.__listView.count > 0
             onClicked: {
                 myTreeView.expandAll()
             }

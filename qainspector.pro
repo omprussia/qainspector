@@ -1,4 +1,4 @@
-QT += quick network xml xmlpatterns
+QT += quick network xml xmlpatterns widgets
 CONFIG += c++11
 
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -6,11 +6,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
     main.cpp \
     mytreemodel.cpp \
-    socketconnector.cpp
+    socketconnector.cpp \
+    iteminfodialog.cpp \
+    treeviewdialog.cpp \
+    mytreemodel2.cpp
 
 HEADERS += \
     mytreemodel.h \
-    socketconnector.h
+    socketconnector.h \
+    iteminfodialog.h \
+    treeviewdialog.h \
+    mytreemodel2.h
 
 RESOURCES += qml.qrc
 

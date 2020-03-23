@@ -51,7 +51,7 @@ void SocketConnector::setConnected(bool connected)
     qDebug() << Q_FUNC_INFO << "Set connect:" << connected << "Connected:" << isConnected();
 }
 
-void SocketConnector::getDumpPage(QJSValue callback)
+QString SocketConnector::getDumpPage()
 {
     QJsonObject json;
 
@@ -73,7 +73,7 @@ void SocketConnector::getDumpPage(QJSValue callback)
         if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
             qDebug().noquote() << replyData;
-            return;
+            return QString();
         }
         const QString readData = m_socket->readLine();
         replyData.append(readData);
@@ -84,13 +84,16 @@ void SocketConnector::getDumpPage(QJSValue callback)
     const QString dump = replyObject.value(QStringLiteral("value")).toString();
 
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
-        if (callback.isCallable()) {
-            callback.call({ QJSValue(dump) });
-        }
+        return dump;
     }
+    return QString();
 }
 
-void SocketConnector::getDumpTree(QJSValue callback)
+void SocketConnector::getDumpPage(QJSValue callback)
+{
+}
+
+QString SocketConnector::getDumpTree()
 {
     QJsonObject json;
     json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
@@ -113,7 +116,7 @@ void SocketConnector::getDumpTree(QJSValue callback)
         if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
             qDebug().noquote() << replyData;
-            return;
+            return QString();
         }
         replyData.append(m_socket->readAll());
         replyDoc = QJsonDocument::fromJson(replyData, &error);
@@ -121,14 +124,21 @@ void SocketConnector::getDumpTree(QJSValue callback)
 
     QJsonObject replyObject = replyDoc.object();
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
-        if (callback.isCallable()) {
-            QByteArray data = qUncompress(QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toLatin1()));
-            callback.call({ QJSValue(QString::fromUtf8(data)) });
-        }
+        QByteArray data = qUncompress(QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toLatin1()));
+        return QString::fromUtf8(data);
+    }
+    return QString();
+}
+
+void SocketConnector::getDumpTree(QJSValue callback)
+{
+    const QString result = getDumpTree();
+    if (!result.isEmpty() && callback.isCallable()) {
+        callback.call({ QJSValue(result) });
     }
 }
 
-void SocketConnector::getDumpCover(QJSValue callback)
+QString SocketConnector::getDumpCover()
 {
     QJsonObject json;
     json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
@@ -151,7 +161,7 @@ void SocketConnector::getDumpCover(QJSValue callback)
         if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
             qDebug().noquote() << replyData;
-            return;
+            return QString();
         }
         replyData.append(m_socket->readAll());
         replyDoc = QJsonDocument::fromJson(replyData, &error);
@@ -159,13 +169,19 @@ void SocketConnector::getDumpCover(QJSValue callback)
 
     QJsonObject replyObject = replyDoc.object();
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
-        if (callback.isCallable()) {
-            callback.call({ QJSValue(replyObject.value(QStringLiteral("value")).toString()) });
-        }
+        return replyObject.value(QStringLiteral("value")).toString();
     }
 }
 
-void SocketConnector::getGrabWindow(QJSValue callback)
+void SocketConnector::getDumpCover(QJSValue callback)
+{
+    const QString result = getDumpCover();
+    if (!result.isEmpty() && callback.isCallable()) {
+        callback.call({ QJSValue(result) });
+    }
+}
+
+bool SocketConnector::getGrabWindow()
 {
     QJsonObject json;
     json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
@@ -188,7 +204,7 @@ void SocketConnector::getGrabWindow(QJSValue callback)
         if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
             qDebug().noquote() << replyData;
-            return;
+            return false;
         }
         replyData.append(m_socket->readAll());
         replyDoc = QJsonDocument::fromJson(replyData, &error);
@@ -199,18 +215,25 @@ void SocketConnector::getGrabWindow(QJSValue callback)
 
         QFile file(QStringLiteral("dump.png"));
         if (file.open(QFile::WriteOnly)) {
-            const QByteArray data = QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toUtf8());
-            qDebug() << Q_FUNC_INFO << file.write(data);
+            const QByteArray img = QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toUtf8());
+            qDebug() << Q_FUNC_INFO << file.write(img);
             file.close();
         }
 
-        if (callback.isCallable()) {
-            callback.call({ QJSValue(!data.isEmpty()) });
-        }
+        return !data.isEmpty();
+    }
+    return false;
+}
+
+void SocketConnector::getGrabWindow(QJSValue callback)
+{
+    const bool result = getGrabWindow();
+    if (callback.isCallable()) {
+        callback.call({ QJSValue(result) });
     }
 }
 
-void SocketConnector::getGrabCover(QJSValue callback)
+bool SocketConnector::getGrabCover()
 {
     QJsonObject json;
     json.insert(QStringLiteral("cmd"), QJsonValue(QStringLiteral("action")));
@@ -233,7 +256,7 @@ void SocketConnector::getGrabCover(QJSValue callback)
         if (!m_socket->waitForReadyRead(-1)) {
             qWarning() << Q_FUNC_INFO << "Timeout" << error.error << error.errorString();
             qDebug().noquote() << replyData;
-            return;
+            return false;
         }
         replyData.append(m_socket->readAll());
         replyDoc = QJsonDocument::fromJson(replyData, &error);
@@ -243,13 +266,20 @@ void SocketConnector::getGrabCover(QJSValue callback)
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
         QFile file(QStringLiteral("dump.png"));
         if (file.open(QFile::WriteOnly)) {
-            const QByteArray data = QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toUtf8());
-            qDebug() << Q_FUNC_INFO << file.write(data);
+            const QByteArray img = QByteArray::fromBase64(replyObject.value(QStringLiteral("value")).toString().toUtf8());
+            qDebug() << Q_FUNC_INFO << file.write(img);
             file.close();
         }
 
-        if (callback.isCallable()) {
-            callback.call({ QJSValue(!data.isEmpty()) });
-        }
+        return !data.isEmpty();
+    }
+    return false;
+}
+
+void SocketConnector::getGrabCover(QJSValue callback)
+{
+    const bool result = getGrabCover();
+    if (callback.isCallable()) {
+        callback.call({ QJSValue(result) });
     }
 }

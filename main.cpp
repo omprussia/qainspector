@@ -1,5 +1,8 @@
 #include "mytreemodel.h"
 #include "socketconnector.h"
+#include "treeviewdialog.h"
+
+#include <QApplication>
 
 #include <QFile>
 #include <QFileInfo>
@@ -13,20 +16,33 @@
 
 int main(int argc, char *argv[])
 {
-    qmlRegisterType<SocketConnector>("ru.omprussia.qainspector", 1, 0, "SocketConnection");
-    qmlRegisterType<MyTreeModel>("ru.omprussia.qainspector", 1, 0, "ItemsTreeModes");
+    QScopedPointer<QCoreApplication> app;
 
-    QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-    QGuiApplication app(argc, argv);
+    if (argc == 2 && strcmp(argv[1], "--widgets") == 0) {
+        app.reset(new QApplication(argc, argv));
+        TreeViewDialog *w = new TreeViewDialog;
+        w->show();
 
-    QQmlApplicationEngine engine;
+        QTimer::singleShot(0, w, &TreeViewDialog::init);
+    } else {
+        qmlRegisterType<SocketConnector>("ru.omprussia.qainspector", 1, 0, "SocketConnection");
+        qmlRegisterType<MyTreeModel>("ru.omprussia.qainspector", 1, 0, "ItemsTreeModes");
 
-    QFileInfo png(QStringLiteral("dump.png"));
-    engine.rootContext()->setContextProperty(QStringLiteral("myImage"), QUrl::fromLocalFile(png.absoluteFilePath()));
+        QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+        app.reset(new QGuiApplication(argc, argv));
 
-    engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-    if (engine.rootObjects().isEmpty())
-        return -1;
+        QQmlApplicationEngine *engine = new QQmlApplicationEngine;
 
-    return app.exec();
+        QFileInfo png(QStringLiteral("dump.png"));
+        engine->rootContext()->setContextProperty(QStringLiteral("myImage"), QUrl::fromLocalFile(png.absoluteFilePath()));
+
+        QTimer::singleShot(0, app.data(), [engine]() {
+            engine->load(QUrl(QStringLiteral("qrc:/main.qml")));
+        });
+    }
+
+    app->setOrganizationDomain("ru.omprussia");
+    app->setOrganizationName("Open Mobile Platform");
+    app->setApplicationName("qainspector");
+    return app->exec();
 }
