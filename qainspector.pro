@@ -4,6 +4,7 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
+    PaintedWidget.cpp \
     main.cpp \
     mytreemodel.cpp \
     socketconnector.cpp \
@@ -12,6 +13,7 @@ SOURCES += \
     mytreemodel2.cpp
 
 HEADERS += \
+    PaintedWidget.hpp \
     mytreemodel.h \
     socketconnector.h \
     iteminfodialog.h \

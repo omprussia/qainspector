@@ -91,11 +91,7 @@ QLayout *TreeViewDialog::createTopLayout()
             model->loadDump(data);
         }
         if (socket->getGrabWindow()) {
-            QPixmap image;
-            image.load("dump.png");
-            image = image.scaled(image.width() / 2, image.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            qDebug() << Q_FUNC_INFO << dumpImage;
-            dumpImage->setPixmap(image);
+            paintedWidget->setImage("dump.png", true);
         }
     });
     dumpTreeButton->setVisible(false);
@@ -107,10 +103,7 @@ QLayout *TreeViewDialog::createTopLayout()
             model->loadDump(data);
         }
         if (socket->getGrabWindow()) {
-            QPixmap image;
-            image.load("dump.png");
-            image = image.scaled(image.width() / 2, image.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            dumpImage->setPixmap(image);
+            paintedWidget->setImage("dump.png", true);
         }
     });
     dumpPageButton->setVisible(false);
@@ -122,10 +115,7 @@ QLayout *TreeViewDialog::createTopLayout()
             model->loadDump(data);
         }
         if (socket->getGrabCover()) {
-            QPixmap image;
-            image.load("dump.png");
-            image = image.scaled(image.width() / 2, image.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            dumpImage->setPixmap(image);
+            paintedWidget->setImage("dump.png", true);
         }
     });
     dumpCoverButton->setVisible(false);
@@ -168,20 +158,14 @@ QLayout *TreeViewDialog::createDeviceLayout()
 {
     auto deviceLayout = new QVBoxLayout;
 
-    dumpImage = new QLabel;
-    QPixmap image;
-    image.load("dump.png");
-    image = image.scaled(image.width() / 2, image.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    dumpImage->setPixmap(image);
-    dumpImage->installEventFilter(this);
-    deviceLayout->addWidget(dumpImage);
+    paintedWidget = new PaintedWidget(this);
+    paintedWidget->setImage("dump.png");
+    paintedWidget->installEventFilter(this);
+    deviceLayout->addWidget(paintedWidget);
 
     auto refreshButton = new QPushButton(tr("Refresh"), this);
     connect(refreshButton, &QPushButton::released, [=]() {
-        QPixmap image;
-        image.load("dump.png");
-        image = image.scaled(image.width() / 2, image.height() / 2, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-        dumpImage->setPixmap(image);
+        paintedWidget->setImage("dump.png", true);
     });
     refreshButton->setFixedWidth(100);
     refreshButton->setVisible(false);

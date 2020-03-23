@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QDialog>
+#include "PaintedWidget.hpp"
 #include "mytreemodel2.h"
 
 class QTreeView;
@@ -46,7 +47,7 @@ private:
     QTreeView *treeView;
     QLineEdit *searchLineEdit;
     QCheckBox *partialCheckBox;
-    QLabel *dumpImage;
+    PaintedWidget *paintedWidget;
 
     QSettings *settings;
 
