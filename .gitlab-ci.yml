@@ -1,0 +1,34 @@
+stages:
+  - build
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+flatpak-build:
+  stage: build
+  image: "registry.omprussia.ru/a.kozhevnikov/flatpak-builder:latest"
+  tags: ["docker"]
+
+  variables:
+    APP_ID: "ru.omprussia.qainspector"
+    BUNDLE: "${APP_ID}.flatpak"
+    REPO: "repo"
+
+  before_script:
+    - set -ex
+
+  script:
+    - pwd
+    - flatpak-builder --user --force-clean --repo=${REPO} --install-deps-from=flathub build ${APP_ID}.json
+    - flatpak build-bundle --runtime-repo=${RUNTIME_REPO} ${REPO} ${BUNDLE} ${APP_ID} stable
+
+  artifacts:
+    paths:
+      - ${BUNDLE}
+    expire_in: 99999 days
+
+  cache:
+    key: "flatpak-builder-cache"
+    paths:
+      - .flatpak-builder/cache
+

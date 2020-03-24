@@ -3,7 +3,7 @@
   "id": "ru.omprussia.qainspector",
   "branch": "stable",
   "runtime": "org.kde.Platform",
-  "runtime-version": "5.12",
+  "runtime-version": "5.14",
   "sdk": "org.kde.Sdk",
   "command": "ru.omprussia.qainspector",
   "modules": [
@@ -12,8 +12,9 @@
       "buildsystem": "cmake-ninja",
       "sources": [
         {
-          "type": "dir",
-          "path": "."
+          "type": "git",
+          "path": ".",
+          "branch": "HEAD"
         }
       ]
     }

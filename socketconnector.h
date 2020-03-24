@@ -2,7 +2,6 @@
 #define SOCKETCONNECTOR_H
 
 #include <QObject>
-#include <QJsonObject>
 #include <QJSValue>
 
 class QTcpSocket;
