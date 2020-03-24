@@ -3,6 +3,8 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QTcpSocket>
+#include <QJsonObject>
+#include <QJsonDocument>
 
 SocketConnector::SocketConnector(QObject *parent)
     : QObject(parent)
@@ -91,6 +93,10 @@ QString SocketConnector::getDumpPage()
 
 void SocketConnector::getDumpPage(QJSValue callback)
 {
+    const QString result = getDumpPage();
+    if (!result.isEmpty() && callback.isCallable()) {
+        callback.call({ QJSValue(result) });
+    }
 }
 
 QString SocketConnector::getDumpTree()
@@ -171,6 +177,7 @@ QString SocketConnector::getDumpCover()
     if (replyObject.contains(QStringLiteral("status")) && replyObject.value(QStringLiteral("status")).toInt() == 0) {
         return replyObject.value(QStringLiteral("value")).toString();
     }
+    return QString();
 }
 
 void SocketConnector::getDumpCover(QJSValue callback)
