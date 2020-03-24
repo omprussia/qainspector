@@ -2,7 +2,6 @@
 #define SOCKETCONNECTOR_H
 
 #include <QObject>
-#include <QJsonObject>
 #include <QJSValue>
 
 class QTcpSocket;
@@ -21,10 +20,20 @@ public:
     Q_PROPERTY(QString applicationName MEMBER m_applicationName NOTIFY applicationNameChanged)
 
 public slots:
+    QString getDumpPage();
     void getDumpPage(QJSValue callback);
+
+    QString getDumpTree();
     void getDumpTree(QJSValue callback);
 
+    QString getDumpCover();
+    void getDumpCover(QJSValue callback);
+
+    bool getGrabWindow();
     void getGrabWindow(QJSValue callback);
+
+    bool getGrabCover();
+    void getGrabCover(QJSValue callback);
 
 signals:
     void connectedChanged(bool connected);

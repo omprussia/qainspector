@@ -35,12 +35,14 @@ private:
 
 };
 
+class QXmlStreamWriter;
 class MyTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
     explicit MyTreeModel(QObject *parent = nullptr);
 
+    QMap<int, QVariant> itemData(const QModelIndex &index) const override;
     QVariant data(const QModelIndex &index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex &index) const override;
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -56,15 +58,24 @@ public:
     Q_INVOKABLE QVariantList getDataList(const QModelIndex &index);
     Q_INVOKABLE void copyToClipboard(const QModelIndex &index);
 
+    Q_INVOKABLE void copyText(const QString &text);
+
 public slots:
     void fillModel(const QJsonObject &object);
     void loadDump(const QString &dump);
 
+    QVariantList getChildrenIndexes(TreeItem *node = nullptr);
+    QModelIndex searchIndex(const QString &key, const QVariant &value, bool partialSearch, const QModelIndex &currentIndex, TreeItem *node = nullptr);
+    QModelIndex searchByCoordinates(int posx, int posy, TreeItem *node = nullptr);
+
 private:
     QList<TreeItem*> processChilds(const QJsonArray &data, TreeItem *parentItem);
+    QString searchXPath(const QString &xpath, const QString &currentId = QString());
+    void recursiveDumpXml(QXmlStreamWriter *writer, TreeItem *parent);
 
     QStringList m_roleNames;
     QHash<int, QByteArray> m_roles;
+    QHash<TreeItem*, QModelIndex> m_indexes;
 
     TreeItem *m_rootItem = nullptr;
 };

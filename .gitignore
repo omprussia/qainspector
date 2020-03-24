@@ -32,3 +32,19 @@ Makefile*
 #QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+\.flatpak-builder/
+
+qainspector/
+
+repo/
+
+*.user
+
+dump\.png
+
+*.flatpak
+
+ru\.omprussia\.qainspector/
+
+build/
