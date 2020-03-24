@@ -69,7 +69,8 @@ public slots:
     QVariantList getChildrenIndexes(TreeItem2 *node = nullptr);
     QModelIndex searchIndex(const QString &key, const QVariant &value, bool partialSearch, const QModelIndex &currentIndex, TreeItem2 *node = nullptr);
     QModelIndex searchIndex(SearchType key, const QVariant &value, bool partialSearch, const QModelIndex &currentIndex, TreeItem2 *node = nullptr);
-    QModelIndex searchByCoordinates(int posx, int posy, TreeItem2 *node = nullptr);
+    QModelIndex searchByCoordinates(qreal posx, qreal posy, TreeItem2 *node = nullptr);
+    QModelIndex searchByCoordinates(const QPointF &pos, TreeItem2 *node = nullptr);
 
 private:
     QList<TreeItem2*> processChilds(const QJsonArray &data, TreeItem2 *parentItem);

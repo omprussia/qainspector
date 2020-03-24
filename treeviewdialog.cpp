@@ -31,7 +31,6 @@ TreeViewDialog::TreeViewDialog()
     treeView->setSelectionMode(QAbstractItemView::SingleSelection);
     treeView->setSelectionBehavior(QAbstractItemView::SelectRows);
     treeView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(treeView, &QTreeView::customContextMenuRequested, this, &TreeViewDialog::onContextMenuRequested);
 
     model = new MyTreeModel2;
     treeView->setModel(model);
@@ -44,6 +43,11 @@ TreeViewDialog::TreeViewDialog()
     treeView->setColumnWidth(6, 50);
     treeView->setColumnWidth(7, 50);
     treeView->setColumnWidth(8, 50);
+
+    connect(treeView, &QTreeView::customContextMenuRequested, this, &TreeViewDialog::onContextMenuRequested);
+    connect(treeView->selectionModel(), &QItemSelectionModel::currentChanged, [this](const QModelIndex &current, const QModelIndex &previous) {
+        paintedWidget->setItemRect(model->getRect(current));
+    });
 }
 
 QLayout *TreeViewDialog::createTopLayout()
@@ -303,14 +307,11 @@ void TreeViewDialog::selectSearchResult(const QModelIndex &index)
         treeView->selectionModel()->select(
             QItemSelection(index, index),
             QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-
     }
 }
 
 void TreeViewDialog::onContextMenuRequested(const QPoint &pos)
 {
-    qDebug() << Q_FUNC_INFO << pos;
-
     ItemInfoDialog info;
     info.setWindowTitle(tr("properties list"));
     info.setData(model->getData(treeView->currentIndex()));
@@ -321,7 +322,12 @@ bool TreeViewDialog::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::MouseButtonPress) {
         QMouseEvent *me = static_cast<QMouseEvent*>(event);
-        qDebug() << Q_FUNC_INFO << me;
+        paintedWidget->setClickPoint(me->localPos());
+
+        QModelIndex index = model->searchByCoordinates(me->localPos());
+        if (index.isValid()) {
+            selectSearchResult(index);
+        }
     }
 
     return QObject::eventFilter(obj, event);

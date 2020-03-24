@@ -11,7 +11,7 @@ public:
 public slots:
     void setImage(const QString &path, bool force = false);
     void setItemRect(const QRect &rect);
-    void setClickRect(const QRect &rect);
+    void setClickPoint(const QPointF &point);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -19,6 +19,6 @@ protected:
 private:
     QString m_image;
     QRect m_itemRect;
-    QRect m_clickRect;
+    QPointF m_clickPoint;
 };
 

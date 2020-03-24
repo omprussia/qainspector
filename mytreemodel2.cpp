@@ -384,60 +384,67 @@ QModelIndex MyTreeModel2::searchIndex(SearchType key, const QVariant &value, boo
     }
 }
 
-QModelIndex MyTreeModel2::searchByCoordinates(int posx, int posy, TreeItem2 *node)
+QModelIndex MyTreeModel2::searchByCoordinates(qreal posx, qreal posy, TreeItem2 *node)
 {
-    //    qDebug() << Q_FUNC_INFO << posx << posy;
-        TreeItem2 *parent = node ? node : m_rootItem;
-        QModelIndex childIndex;
+    TreeItem2 *parent = node ? node : m_rootItem;
+    QModelIndex childIndex;
 
-        for (int i = 0; i != parent->childCount(); ++i) {
-            TreeItem2 *child = parent->child(i);
-            const QVariant activeVariant = child->data(QStringLiteral("active"));
-            const bool active = activeVariant.isValid() ? activeVariant.toBool() : true;
-            if (!active) {
-                continue;
-            }
-
-            const bool visible = child->data(QStringLiteral("visible")).toBool();
-            if (!visible) {
-                continue;
-            }
-
-            const bool enabled = child->data(QStringLiteral("enabled")).toBool();
-            if (!enabled) {
-                continue;
-            }
-
-            const float opacity = child->data(QStringLiteral("opacity")).toFloat();
-            if (opacity == 0.0f) {
-                continue;
-            }
-
-            const QString classname = child->data(QStringLiteral("classname")).toString();
-            const int itemx = child->data(QStringLiteral("abs_x")).toInt();
-            const int itemy = child->data(QStringLiteral("abs_y")).toInt();
-            const int itemw = child->data(QStringLiteral("width")).toInt();
-            const int itemh = child->data(QStringLiteral("height")).toInt();
-
-            if (classname != QLatin1String("QQuickLoader")
-                    && classname != QLatin1String("DeclarativeTouchBlocker")
-                    && classname != QLatin1String("QQuickItem")
-                    && classname != QLatin1String("RotatingItem")
-                    && classname != QLatin1String("QQuickShaderEffect")
-                    && classname != QLatin1String("QQuickShaderEffectSource")
-                    && !classname.endsWith(QLatin1String("Gradient"))
-                    && posx >= itemx && posx <= (itemx + itemw)
-                    && posy >= itemy && posy <= (itemy + itemh)) {
-                childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
-            }
-
-            QModelIndex someIndex = searchByCoordinates(posx, posy, child);
-            if (someIndex.isValid()) {
-                childIndex = someIndex;
-            }
+    for (int i = 0; i != parent->childCount(); ++i) {
+        TreeItem2 *child = parent->child(i);
+        const QVariant activeVariant = child->data(QStringLiteral("active"));
+        const bool active = activeVariant.isValid() ? activeVariant.toBool() : true;
+        if (!active) {
+            continue;
         }
 
-        return childIndex;
+        const QVariant visibleVariant = child->data(QStringLiteral("visible"));
+        const bool visible = visibleVariant.isValid() ? visibleVariant.toBool() : true;
+        if (!visible) {
+            continue;
+        }
+
+        const QVariant enabledVariant = child->data(QStringLiteral("enabled"));
+        const bool enabled = enabledVariant.isValid() ? enabledVariant.toBool() : true;
+        if (!enabled) {
+            continue;
+        }
+
+        const QVariant opacityVariant = child->data(QStringLiteral("opacity"));
+        const float opacity = opacityVariant.isValid() ? opacityVariant.toFloat() : 1.0f;
+        if (opacity == 0.0f) {
+            continue;
+        }
+
+        const QString classname = child->data(QStringLiteral("classname")).toString();
+        const int itemx = child->data(QStringLiteral("abs_x")).toInt();
+        const int itemy = child->data(QStringLiteral("abs_y")).toInt();
+        const int itemw = child->data(QStringLiteral("width")).toInt();
+        const int itemh = child->data(QStringLiteral("height")).toInt();
+
+        if (classname != QLatin1String("QQuickLoader")
+                && classname != QLatin1String("DeclarativeTouchBlocker")
+                && classname != QLatin1String("QQuickItem")
+                && classname != QLatin1String("RotatingItem")
+                && classname != QLatin1String("QQuickShaderEffect")
+                && classname != QLatin1String("QQuickShaderEffectSource")
+                && !classname.endsWith(QLatin1String("Gradient"))
+                && posx >= itemx && posx <= (itemx + itemw)
+                && posy >= itemy && posy <= (itemy + itemh)) {
+            childIndex = createIndex(i, 0, reinterpret_cast<quintptr>(child));
+        }
+
+        QModelIndex someIndex = searchByCoordinates(posx, posy, child);
+        if (someIndex.isValid()) {
+            childIndex = someIndex;
+        }
+    }
+
+    return childIndex;
+}
+
+QModelIndex MyTreeModel2::searchByCoordinates(const QPointF &pos, TreeItem2 *node)
+{
+    return searchByCoordinates(pos.x() * 2, pos.y() * 2, node);
 }
 
 TreeItem2::TreeItem2(const QJsonObject &data, TreeItem2 *parent)
