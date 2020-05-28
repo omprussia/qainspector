@@ -1,3 +1,4 @@
+// Copyright (c) 2020 Open Mobile Platform LLС.
 #ifndef ITEMINFODIALOG_H
 #define ITEMINFODIALOG_H
 

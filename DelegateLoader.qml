@@ -1,3 +1,4 @@
+// Copyright (c) 2020 Open Mobile Platform LLС.
 /****************************************************************************
 **
 ** Copyright (C) 2016 The Qt Company Ltd.

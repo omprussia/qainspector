@@ -1,3 +1,4 @@
+// Copyright (c) 2020 Open Mobile Platform LLС.
 import QtQuick 2.12
 import QtQuick.Controls 1.4 as ControlsOld
 import QtQuick.Controls.Styles 1.4 as StylesOld

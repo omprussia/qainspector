@@ -1,3 +1,4 @@
+// Copyright (c) 2020 Open Mobile Platform LLС.
 #include "mytreemodel.h"
 #include "socketconnector.h"
 #include "treeviewdialog.h"

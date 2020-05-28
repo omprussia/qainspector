@@ -1,3 +1,4 @@
+# Copyright (c) 2020 Open Mobile Platform LLС.
 QT += quick network xml xmlpatterns widgets
 CONFIG += c++11
 

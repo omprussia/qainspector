@@ -1,3 +1,4 @@
+// Copyright (c) 2020 Open Mobile Platform LLС.
 #ifndef SOCKETCONNECTOR_H
 #define SOCKETCONNECTOR_H
 

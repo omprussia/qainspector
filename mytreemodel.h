@@ -1,3 +1,4 @@
+// Copyright (c) 2020 Open Mobile Platform LLС.
 #ifndef MYTREEMODEL_H
 #define MYTREEMODEL_H
 
