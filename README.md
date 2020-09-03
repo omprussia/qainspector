@@ -1,4 +1,6 @@
-# qainspector
+# Inspection tool companion for qapreload
+
+Can be used for inspecting element tree of applications with injected qapreload library.
 
 ## prepare
 
