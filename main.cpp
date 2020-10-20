@@ -19,13 +19,7 @@ int main(int argc, char *argv[])
 {
     QScopedPointer<QCoreApplication> app;
 
-    if (argc == 2 && strcmp(argv[1], "--widgets") == 0) {
-        app.reset(new QApplication(argc, argv));
-        TreeViewDialog *w = new TreeViewDialog;
-        w->show();
-
-        QTimer::singleShot(0, w, &TreeViewDialog::init);
-    } else {
+    if (argc == 2 && strcmp(argv[1], "--qml") == 0) {
         qmlRegisterType<SocketConnector>("ru.omprussia.qainspector", 1, 0, "SocketConnection");
         qmlRegisterType<MyTreeModel>("ru.omprussia.qainspector", 1, 0, "ItemsTreeModes");
 
@@ -40,6 +34,12 @@ int main(int argc, char *argv[])
         QTimer::singleShot(0, app.data(), [engine]() {
             engine->load(QUrl(QStringLiteral("qrc:/main.qml")));
         });
+    } else {
+        app.reset(new QApplication(argc, argv));
+        TreeViewDialog *w = new TreeViewDialog;
+        w->show();
+
+        QTimer::singleShot(0, w, &TreeViewDialog::init);
     }
 
     app->setOrganizationDomain("ru.omprussia");
