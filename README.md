@@ -31,4 +31,7 @@ flatpak --user install ru.omprussia.qainspector.flatpak
 flatpak run ru.omprussia.qainspector
 ```
 
+Run dummy test for your application, while application is launched with Appium `bridge` connect to it using this tool.
+
+Application could be launched manually with `LD_PRELOAD` or injecting `libqapreloadhook` library to executable. Make sure to put `libqaengine` library in the same folder with 'libqapreloadhook'
 
