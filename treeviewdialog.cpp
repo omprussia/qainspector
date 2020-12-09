@@ -18,6 +18,7 @@
 #include <QHeaderView>
 #include <QAction>
 #include <QShortcut>
+#include <QEventLoop>
 
 #include "mytreemodel.h"
 #include "iteminfodialog.h"
@@ -63,6 +64,7 @@ QLayout *TreeViewDialog::createTopLayout()
     ipLineEdit->setText(settings->value(QStringLiteral("connection/host"),
                                         ipLineEdit->placeholderText()).toString());
     ipLineEdit->setFixedWidth(80);
+    connectionLayout->addWidget(ipLineEdit);
 
     auto portLineEdit = new QLineEdit(this);
     connect(portLineEdit, &QLineEdit::textChanged, [&](const QString &text) {
@@ -73,6 +75,7 @@ QLayout *TreeViewDialog::createTopLayout()
     portLineEdit->setText(settings->value(QStringLiteral("connection/port"),
                                           portLineEdit->placeholderText()).toString());
     portLineEdit->setFixedWidth(50);
+    connectionLayout->addWidget(portLineEdit);
 
     auto appNameLineEdit = new QLineEdit(this);
     connect(appNameLineEdit, &QLineEdit::textChanged, [&](const QString &text) {
@@ -83,14 +86,30 @@ QLayout *TreeViewDialog::createTopLayout()
     appNameLineEdit->setText(settings->value(QStringLiteral("application/name"),
                                              appNameLineEdit->placeholderText()).toString());
     appNameLineEdit->setFixedWidth(108);
+    connectionLayout->addWidget(appNameLineEdit);
 
     auto connectButton = new QPushButton(tr("Connect"), this);
     connect(connectButton, &QPushButton::released, [=]() {
         socket->setConnected(!socket->isConnected());
     });
+    connectButton->setFixedWidth(80);
+    connectionLayout->addWidget(connectButton);
 
-    auto dumpTreeButton = new QPushButton(tr("Dump tree"), this);
-    connect(dumpTreeButton, &QPushButton::released, [=]() {
+    auto dumpTreeButton = new MyPushButton(tr("Dump tree"), this);
+    connect(dumpTreeButton, &MyPushButton::released, [=]() {
+        const QString data = socket->getDumpTree();
+        if (!data.isEmpty()) {
+            model->loadDump(data);
+        }
+        if (socket->getGrabWindow()) {
+            paintedWidget->setImage("dump.png", true);
+        }
+    });
+    connect(dumpTreeButton, &MyPushButton::shiftClicked, [=]() {
+        QEventLoop loop;
+        QTimer::singleShot(3000, &loop, &QEventLoop::quit);
+        loop.exec();
+
         const QString data = socket->getDumpTree();
         if (!data.isEmpty()) {
             model->loadDump(data);
@@ -100,6 +119,8 @@ QLayout *TreeViewDialog::createTopLayout()
         }
     });
     dumpTreeButton->setVisible(false);
+    dumpTreeButton->setFixedWidth(80);
+    connectionLayout->addWidget(dumpTreeButton);
 
     auto dumpPageButton = new QPushButton(tr("Dump page"), this);
     connect(dumpPageButton, &QPushButton::released, [=]() {
@@ -112,6 +133,8 @@ QLayout *TreeViewDialog::createTopLayout()
         }
     });
     dumpPageButton->setVisible(false);
+    dumpPageButton->setFixedWidth(80);
+    connectionLayout->addWidget(dumpPageButton);
 
     auto dumpCoverButton = new QPushButton(tr("Dump cover"), this);
     connect(dumpCoverButton, &QPushButton::released, [=]() {
@@ -124,26 +147,15 @@ QLayout *TreeViewDialog::createTopLayout()
         }
     });
     dumpCoverButton->setVisible(false);
+    dumpCoverButton->setFixedWidth(80);
+    connectionLayout->addWidget(dumpCoverButton);
 
     auto expandAllButton = new QPushButton(tr("Expand all"), this);
     connect(expandAllButton, &QPushButton::clicked, [=]() {
         treeView->expandAll();
     });
     expandAllButton->setVisible(false);
-
-    connectButton->setFixedWidth(80);
-    dumpTreeButton->setFixedWidth(80);
-    dumpPageButton->setFixedWidth(80);
-    dumpCoverButton->setFixedWidth(80);
     expandAllButton->setFixedWidth(80);
-
-    connectionLayout->addWidget(ipLineEdit);
-    connectionLayout->addWidget(portLineEdit);
-    connectionLayout->addWidget(appNameLineEdit);
-    connectionLayout->addWidget(connectButton);
-    connectionLayout->addWidget(dumpTreeButton);
-    connectionLayout->addWidget(dumpPageButton);
-    connectionLayout->addWidget(dumpCoverButton);
     connectionLayout->addWidget(expandAllButton);
 
     connect(socket, &SocketConnector::connectedChanged, [=](bool isSocketConnected) {
@@ -337,4 +349,27 @@ bool TreeViewDialog::eventFilter(QObject *obj, QEvent *event)
 void TreeViewDialog::reloadImage()
 {
 
+}
+
+MyPushButton::MyPushButton(QWidget *parent)
+    : QPushButton(parent)
+{
+
+}
+
+MyPushButton::MyPushButton(const QString &text, QWidget *parent)
+    : QPushButton(text, parent)
+{
+
+}
+
+void MyPushButton::mousePressEvent(QMouseEvent *event)
+{
+    qDebug() << Q_FUNC_INFO << event;
+
+    if (event->modifiers() == Qt::ShiftModifier) {
+        emit shiftClicked();
+    } else {
+        QPushButton::mousePressEvent(event);
+    }
 }
