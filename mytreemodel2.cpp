@@ -387,33 +387,40 @@ QModelIndex MyTreeModel2::searchIndex(SearchType key, const QVariant &value, boo
 
 QModelIndex MyTreeModel2::searchByCoordinates(qreal posx, qreal posy, TreeItem2 *node)
 {
+    if (!node) {
+        qDebug() << Q_FUNC_INFO << posx << posy;
+    }
+
     TreeItem2 *parent = node ? node : m_rootItem;
     QModelIndex childIndex;
 
     for (int i = 0; i != parent->childCount(); ++i) {
         TreeItem2 *child = parent->child(i);
+
+        bool canProcess = true;
+
         const QVariant activeVariant = child->data(QStringLiteral("active"));
         const bool active = activeVariant.isValid() ? activeVariant.toBool() : true;
         if (!active) {
-            continue;
+            canProcess = false;
         }
 
         const QVariant visibleVariant = child->data(QStringLiteral("visible"));
         const bool visible = visibleVariant.isValid() ? visibleVariant.toBool() : true;
         if (!visible) {
-            continue;
+            canProcess = false;
         }
 
         const QVariant enabledVariant = child->data(QStringLiteral("enabled"));
         const bool enabled = enabledVariant.isValid() ? enabledVariant.toBool() : true;
         if (!enabled) {
-            continue;
+            canProcess = false;
         }
 
         const QVariant opacityVariant = child->data(QStringLiteral("opacity"));
         const float opacity = opacityVariant.isValid() ? opacityVariant.toFloat() : 1.0f;
         if (opacity == 0.0f) {
-            continue;
+            canProcess = false;
         }
 
         const QString classname = child->data(QStringLiteral("classname")).toString();
@@ -422,12 +429,14 @@ QModelIndex MyTreeModel2::searchByCoordinates(qreal posx, qreal posy, TreeItem2 
         const int itemw = child->data(QStringLiteral("width")).toInt();
         const int itemh = child->data(QStringLiteral("height")).toInt();
 
-        if (classname != QLatin1String("QQuickLoader")
+        if (canProcess
+                && !classname.endsWith(QLatin1String("Loader"))
                 && classname != QLatin1String("DeclarativeTouchBlocker")
                 && classname != QLatin1String("QQuickItem")
                 && classname != QLatin1String("RotatingItem")
                 && classname != QLatin1String("QQuickShaderEffect")
                 && classname != QLatin1String("QQuickShaderEffectSource")
+                && classname != QLatin1String("HwcImage")
                 && !classname.endsWith(QLatin1String("Gradient"))
                 && posx >= itemx && posx <= (itemx + itemw)
                 && posy >= itemy && posy <= (itemy + itemh)) {

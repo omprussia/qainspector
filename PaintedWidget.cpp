@@ -97,7 +97,7 @@ void PaintedWidget::paintEvent(QPaintEvent *)
     }
 
     if (!m_clickPoint.isNull()) {
-        QString text = QStringLiteral(" %1:%2 ").arg(m_clickPoint.x()).arg(m_clickPoint.y());
+        QString text = QStringLiteral(" %1:%2 ").arg(m_clickPoint.x() * 2).arg(m_clickPoint.y() * 2);
         QSize fontSize = painter.fontMetrics().size(Qt::TextSingleLine, text);
         const QRectF textRect{m_clickPoint, QSizeF(fontSize)};
 
