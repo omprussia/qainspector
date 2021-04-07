@@ -31,7 +31,7 @@ signals:
     void shiftClicked();
 };
 
-class TreeViewDialog : public QDialog
+class TreeViewDialog : public QWidget
 {
     Q_OBJECT
 public:
@@ -46,7 +46,7 @@ signals:
 private slots:
     void selectSearchResult(const QModelIndex &index);
 
-    void onContextMenuRequested(const QPoint &pos);
+    void onContextMenuRequested(const QPoint &);
 
     bool eventFilter(QObject* obj, QEvent* event) override;
 
@@ -55,7 +55,6 @@ private:
 
     QLayout *createTopLayout();
     QLayout *createDeviceLayout();
-    QLayout *createTreeLayout();
     QLayout *createSearchLayout();
 
     MyTreeModel2 *model;
@@ -69,6 +68,9 @@ private:
 
     SocketConnector *socket;
     MyTreeModel2::SearchType searchType{MyTreeModel2::SearchType::ClassName};
+
+protected:
+    void closeEvent(QCloseEvent *event) override;
 };
 
 #endif // TREEVIEWDIALOG_H

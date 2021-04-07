@@ -19,6 +19,7 @@
 #include <QAction>
 #include <QShortcut>
 #include <QEventLoop>
+#include <QSplitter>
 
 #include "mytreemodel.h"
 #include "iteminfodialog.h"
@@ -47,9 +48,11 @@ TreeViewDialog::TreeViewDialog()
     treeView->setColumnWidth(8, 50);
 
     connect(treeView, &QTreeView::customContextMenuRequested, this, &TreeViewDialog::onContextMenuRequested);
-    connect(treeView->selectionModel(), &QItemSelectionModel::currentChanged, [this](const QModelIndex &current, const QModelIndex &previous) {
+    connect(treeView->selectionModel(), &QItemSelectionModel::currentChanged, [this](const QModelIndex &current, const QModelIndex &) {
         paintedWidget->setItemRect(model->getRect(current));
     });
+
+    restoreGeometry(settings->value("window/geometry").toByteArray());
 }
 
 QLayout *TreeViewDialog::createTopLayout()
@@ -178,6 +181,7 @@ QLayout *TreeViewDialog::createDeviceLayout()
     paintedWidget = new PaintedWidget(this);
     paintedWidget->setImage("dump.png");
     paintedWidget->installEventFilter(this);
+
     deviceLayout->addWidget(paintedWidget);
 
     auto refreshButton = new QPushButton(tr("Refresh"), this);
@@ -197,14 +201,6 @@ QLayout *TreeViewDialog::createDeviceLayout()
     });
 
     return deviceLayout;
-}
-
-QLayout *TreeViewDialog::createTreeLayout()
-{
-    auto treeLayout = new QVBoxLayout;
-    treeLayout->addWidget(treeView);
-
-    return treeLayout;
 }
 
 QLayout *TreeViewDialog::createSearchLayout()
@@ -277,23 +273,50 @@ QLayout *TreeViewDialog::createSearchLayout()
     return searchLayout;
 }
 
+void TreeViewDialog::closeEvent(QCloseEvent *event)
+{
+    settings->setValue("window/geometry", saveGeometry());
+    QWidget::closeEvent(event);
+}
+
 void TreeViewDialog::init()
 {
     auto formLayout = new QVBoxLayout;
     formLayout->addLayout(createTopLayout());
 
-    auto centerLayout = new QHBoxLayout;
-    centerLayout->addLayout(createDeviceLayout());
-    centerLayout->addLayout(createTreeLayout());
-    formLayout->addLayout(centerLayout);
+    auto leftFrame = new QFrame();
+    auto leftWidget = new QWidget(leftFrame);
+    auto device = createDeviceLayout();
+    leftWidget->setLayout(device);
+    leftFrame->setMinimumWidth(100);
+    leftFrame->setMaximumWidth(paintedWidget->width());
+
+    treeView->setMinimumWidth(100);
+
+    auto splitter = new QSplitter(this);
+    splitter->setOrientation(Qt::Horizontal);
+    splitter->addWidget(leftFrame);
+    splitter->addWidget(treeView);
+    splitter->setCollapsible(0, false);
+    splitter->setCollapsible(1, false);
+    splitter->setStretchFactor(1, 2);
+
+    splitter->restoreState(settings->value("splitterSizes").toByteArray());
+
+
+    connect(splitter, &QSplitter::splitterMoved, [splitter, this](int, int) {
+        settings->setValue("splitterSizes", splitter->saveState());
+    });
+
+    formLayout->addWidget(splitter);
 
     formLayout->addLayout(createSearchLayout());
 
     setLayout(formLayout);
 
-//    QFile file("dump.json");
-//    file.open(QIODevice::ReadOnly);
-//    model->loadDump(file.readAll());
+    QFile file("dump.json");
+    file.open(QIODevice::ReadOnly);
+    model->loadDump(file.readAll());
 }
 
 void expandChildren(const QModelIndex &index, QTreeView *view)
@@ -323,7 +346,7 @@ void TreeViewDialog::selectSearchResult(const QModelIndex &index)
     }
 }
 
-void TreeViewDialog::onContextMenuRequested(const QPoint &pos)
+void TreeViewDialog::onContextMenuRequested(const QPoint &)
 {
     ItemInfoDialog info;
     info.setWindowTitle(tr("properties list"));
@@ -337,7 +360,7 @@ bool TreeViewDialog::eventFilter(QObject *obj, QEvent *event)
         QMouseEvent *me = static_cast<QMouseEvent*>(event);
         paintedWidget->setClickPoint(me->localPos());
 
-        QModelIndex index = model->searchByCoordinates(me->localPos());
+        QModelIndex index = model->searchByCoordinates(paintedWidget->scaledClickPoint());
         if (index.isValid()) {
             selectSearchResult(index);
         }
