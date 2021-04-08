@@ -4,9 +4,12 @@
 #include <QLayout>
 #include <QJsonValue>
 #include <QLineEdit>
+#include <QSettings>
 
 ItemInfoDialog::ItemInfoDialog()
 {
+    auto settings = new QSettings(QStringLiteral("qainspector.ini"), QSettings::IniFormat, this);
+    restoreGeometry(settings->value("properties/geometry").toByteArray());
 }
 
 void ItemInfoDialog::setData(const QJsonObject &object)
@@ -56,4 +59,11 @@ bool ItemInfoDialog::eventFilter(QObject *o, QEvent *e)
         return true;
     }
     return QObject::eventFilter(o, e);
+}
+
+void ItemInfoDialog::closeEvent(QCloseEvent *event)
+{
+    auto settings = new QSettings(QStringLiteral("qainspector.ini"), QSettings::IniFormat, this);
+    settings->setValue("properties/geometry", saveGeometry());
+    QDialog::closeEvent(event);
 }
